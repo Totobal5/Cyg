@@ -3,7 +3,7 @@
   "resourceVersion": "1.6",
   "name": "Cyg",
   "resources": [
-    {"id":{"name":"cyg_scripts","path":"scripts/cyg_scripts/cyg_scripts.yy",},"order":0,},
+    {"id":{"name":"Cyg","path":"scripts/Cyg/Cyg.yy",},"order":0,},
     {"id":{"name":"Room1","path":"rooms/Room1/Room1.yy",},"order":0,},
   ],
   "Options": [

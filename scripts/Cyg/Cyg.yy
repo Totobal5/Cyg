@@ -1,7 +1,7 @@
 {
   "resourceType": "GMScript",
   "resourceVersion": "1.0",
-  "name": "cyg_scripts",
+  "name": "Cyg",
   "isDnD": false,
   "isCompatibility": false,
   "parent": {
