@@ -1,116 +1,167 @@
-/// @ignore
-function CygManager(_defaultName) constructor
+/// @desc Sistema de guardado sencillo
+function Cyg()
 {
-	static data  = {};
-	static index =  0;		// indice de guardado
-	static encryptKey = "";	// LLave de cifrado
+	/* 
+		Donde se guardan los datos data: {filename: {DATOS} }
+	*/
+	static data  = {};      
+	static index =  0;      // Indice de guardado
+	static encryptKey = ""; // LLave de cifrado
+	static filename   = ""; // Nombre del archivo
+	static version    = -1; // Version del archivo
+	static versionFixers = {};
 	
-	/// @ignore
-	filename = _defaultName;
-	
-	/// @desc Guarda los archivos a un buffer
-	static save = function(_filename=filename)
+	/// @desc Crea un archivo con los datos
+	/// @param {string} filenameToUse 
+	/// @param {bool}   encrypt       Use encrypt Default to false
+	static export = function(_filenameToUse, _encrypt=false)
 	{
-		var _string = json_stringify(data);	// Pasar a json los datos
-		var _buffer = buffer_create(string_byte_length(_string) + 1, buffer_fixed, 1);
-		buffer_write(_buffer, buffer_string, _string);
-		buffer_save(_buffer, _filename);
+		// Pasar a json los datos
+		var _string;
+		// Guardar la version que se esta utilizando
+		data[$ "__CygVersion"] = version;
+		
+		// usar todos los datos
+		if (_filenameToUse == undefined) {
+			_string = json_stringify(data, false);
+		} else {
+			// Seleccionar una categoria (filename)
+			if (variable_struct_exists(data, _filenameToUse) ) {
+				// Guardar version
+				data[$ _filenameToUse][$ "__CygVersion"] = version;
+				_string = json_stringify(data[$ _filenameToUse]);
+			}
+		}
+		
+		var _buffer;
+		if (_encrypt) {
+			// Si no existe llave de cifrado exportar sin usar esta función
+			if (encryptKey == "") export(_filenameToUse, false);
+			
+			_buffer = buffer_create((string_length(_string) * 2) + 2, buffer_grow, 1);
+			var i=0; repeat(string_length(_string) ) {
+				var original_value = string_byte_at(_string, i);
+				var key_value   = string_byte_at(encryptKey, i);
+				var final_value = original_value + key_value ;
+				buffer_write(_buffer, buffer_s16, final_value);
+				i++;
+			}
+		} else {
+			_buffer = buffer_create(string_byte_length(_string) + 1, buffer_fixed, 1);
+			buffer_write(_buffer, buffer_string, _string);
+		}
+		
+		// Guardar a disco duro
+		buffer_save(_buffer , _filenameToUse);
 		buffer_delete(_buffer);
 	}
 	
-	/// @desc Carga los archivos desde un buffer. Si el archivo existe True
-	static load = function(_filename=filename)
+	/// @desc Carga un archivo del disco duro y lo transforma a JSON.
+	/// @param {string} filenameToUse 
+	/// @param {bool}   encrypt       Use encrypt Default to false
+	static import = function(_filenameToUse, _encrypt=false)
 	{
-		// Si no existe devolver false
-		if (!file_exists(_filename) ) return false;
-		var _buffer = buffer_load(_filename);
-		var _string = buffer_read(_buffer, buffer_string);
-
+		static def = function(_version, _struct) {}
+		// Si no existe devolver false 
+		if (!file_exists(_filenameToUse) ) return false;
+		
+		var _buffer = buffer_load(_filename), _string="";
+		if (_encrypt) {
+			var i=0; repeat(buffer_get_size(_buffer) / 2) {
+				var _char_binary = buffer_read(_buffer, buffer_s16);
+				var _key_value   = string_byte_at(encryptKey, i);
+		
+				var _char = _char_binary - _key_value;
+				_string += ansi_char(_char);
+				
+				i++;
+			}
+		}
+		else {
+			_string = buffer_read(_buffer, buffer_string);
+		}
+		// Eliminar buffer
 		buffer_delete(_buffer);
-		// Cargar datos
-		data = json_parse(_string);
+		
+		// -- Cargar datos
+		if (_filenameToUse == undefined) {
+			// Carga todos los datos
+			data = json_parse(_string);
+		} else {
+			// Añadir categoria a todos los datos (filename)
+			var _str = json_parse(_string);
+			var _fun = versionFixers[$ _filenameToUse] ?? def;
+			// Intentar arreglar algun problema con la version
+			_fun(_str[$ "__CygVersion"], _str);
+			
+			data[$ _filenameToUse] = _str;
+		}
 		
 		return true;
 	}
-	
-	/// @desc Guarda la informacion y la encrypta
-	static saveEncrypt = function(_filename=filename) 
+
+	/// @desc Agrega un filename a los datos
+	/// @param {string} filename
+	static add = function(_key)
 	{
-		var _string = json_stringify(data);	// Pasar a json los datos
-		var _buffer = buffer_create((string_length(_string) * 2) + 2, buffer_grow, 1);
-	
-		for(var i = 1; i <= string_length(_string); i = i+1)
-		{
-			var original_value = string_byte_at(_string, i);
-			var key_value = string_byte_at(encryptKey, i);
-			var final_value = original_value + key_value ;
-			buffer_write(_buffer, buffer_s16, final_value);
-		
-		}
-	
-		buffer_save(_buffer, _filename);
-		buffer_delete(_buffer);
-	}
-	
-	/// @desc Carga la informacion y la desencrypta
-	static loadDecrypt = function(_filename=filename)
-	{
-		//this function reads string from file with name _filename and returns it
-		var _buffer = buffer_load(_filename);
-		var _string = "";
-	
-		for(var i=1; i < (buffer_get_size(_buffer) / 2); i = i+1)
-		{
-			var _char_binary = buffer_read(_buffer, buffer_s16);
-			var _key_value   = string_byte_at(encryptKey, i);
-		
-			var _char = _char_binary - _key_value;
-			_string += ansi_char(_char);
-		}
-	
-		buffer_delete(_buffer);
-		
-		// Cargar datos
-		data = json_decode(_string);
-	}
-	
-	/// @desc Agrega informacion Key, Value
-	static add = function() 
-	{
-		var i=0; repeat(argument_count div 2) {
-			var _key = argument[i];
-			var _val = argument[i + 1];
-			
-			data[$ _key] = _val;
-			i = i + 2;
-		}
-		
+		data[$ _key] = {};
 		return self;
 	}
 	
+	/// @param {string} filename
 	/// @param {String} key
 	/// @param {String} value
-	static set = function(_key, _value) 
+	static set = function(_filename, _key, _value) 
 	{
-		data[$ _key] = _value;
+		// Guardar directamente
+		if (_filename == undefined) {
+			data[$ _key] = _value;
+		} else {
+			if (variable_struct_exists(data, _filename) ) {
+				data[$ _filename][$ _key] = _value;
+			}
+		}
 		return self;
 	}
 	
-	/// @desc Devuelve informacion
+	/// @param {string} filename
 	/// @param {String} key
-	/// @param {Any} [default]
-	static get = function(_key, _default)
+	/// @param {Any} [defaultTo]
+	static get = function(_filename, _key, _default)
 	{
-		return data[$ _key] ?? _default;
+		var _value = undefined;
+		if (_filename == undefined) {
+			_value = data[$ _key];
+		} else {
+			if (variable_struct_exists(data, _filename) ) {
+				_value = data[$ _filename][$ _key];
+			}
+		}
+		
+		return _value ?? _default;
 	}
 	
+	/// @param {String} filename
+	/// @return {Bool}
+	static existsFilename = function(_key)
+	{
+		return (variable_struct_get(data, _key) );
+	}
+
 	/// @param {String} key
 	/// @return {Bool}
-	static exists = function(_key)
+	static exists = function(_filename, _key) 
 	{
-		return (variable_struct_get(data, _key) );	
+		return (variable_struct_get(data[$ _filename], _key) );
 	}
 	
+	/// @param {String} filename
+	/// @param {function} fixMethod function(_version, _struct) {}
+	static setVersionFixer = function(_filename, _fun) {
+		versionFixers[$ _filename] = _fun;
+		return self;
+	}
+
 	/// @param {String} key
 	static remove = function(_key)
 	{
@@ -120,31 +171,5 @@ function CygManager(_defaultName) constructor
 	}
 }
 
-/// @param {String} fileName default name for the file
-/// @return {Struct.CygManager}
-function cyg(_defaultName="")
-{
-	static t = (new CygManager(_defaultName) );
-	return t;
-}
-
-#region GML-Like
-function cyg_exists(_key)
-{
-	static t = cyg();
-	return (t.exists(_key) );
-}
-
-function cyg_get(_key, _default) 
-{
-	static t = cyg();
-	return (t.get(_key, _default) );
-}
-
-function cyg_remove(_key)
-{
-	static t = cyg();
-	return (t.remove(_key) );
-}
-
-#endregion
+// Iniciar variables estaticas
+Cyg();
