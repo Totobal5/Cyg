@@ -1,14 +1,17 @@
+#macro __CYG_VERSION 1.2
+
 /// @desc Sistema de guardado sencillo
-function Cyg()
+function cyg()
 {
 	/* 
 		Donde se guardan los datos data: {filename: {DATOS} }
 	*/
 	static data  = {};      
-	static index =  0;      // Indice de guardado
-	static encryptKey = ""; // LLave de cifrado
-	static filename   = ""; // Nombre del archivo
-	static version    = -1; // Version del archivo
+	static index =  0;           // Indice de guardado
+	static encryptKey   =    ""; // LLave de cifrado
+	static forceEncrypt = false; // Forzar cifrado en todas las versiones
+	static filename   = "";      // Nombre del archivo
+	static version    = -1;      // Version del archivo
 	static versionFixers = {};
 	
 	/// @desc Crea un archivo con los datos
@@ -57,20 +60,21 @@ function Cyg()
 	}
 	
 	/// @desc Carga un archivo del disco duro y lo transforma a JSON.
-	/// @param {string} filenameToUse 
+	/// @param {string} filenameInDisk
+	/// @param {string} filenameToSet 
 	/// @param {bool}   encrypt       Use encrypt Default to false
-	static import = function(_filenameToUse, _encrypt=false)
+	static import = function(_filenameInDisk, _filenameToSet, _encrypt=false)
 	{
 		static def = function(_version, _struct) {}
 		// Si no existe devolver false 
-		if (!file_exists(_filenameToUse) ) return false;
+		if (!file_exists(_filenameInDisk) ) return false;
 		
-		var _buffer = buffer_load(_filename), _string="";
+		var _buffer = buffer_load(_filenameInDisk), _string="";
 		if (_encrypt) {
 			var i=0; repeat(buffer_get_size(_buffer) / 2) {
 				var _char_binary = buffer_read(_buffer, buffer_s16);
 				var _key_value   = string_byte_at(encryptKey, i);
-		
+				
 				var _char = _char_binary - _key_value;
 				_string += ansi_char(_char);
 				
@@ -80,21 +84,22 @@ function Cyg()
 		else {
 			_string = buffer_read(_buffer, buffer_string);
 		}
+		
 		// Eliminar buffer
 		buffer_delete(_buffer);
 		
 		// -- Cargar datos
-		if (_filenameToUse == undefined) {
+		if (_filenameToSet == undefined) {
 			// Carga todos los datos
 			data = json_parse(_string);
 		} else {
 			// Añadir categoria a todos los datos (filename)
 			var _str = json_parse(_string);
-			var _fun = versionFixers[$ _filenameToUse] ?? def;
+			var _fun = versionFixers[$ _filenameToSet] ?? def;
 			// Intentar arreglar algun problema con la version
 			_fun(_str[$ "__CygVersion"], _str);
 			
-			data[$ _filenameToUse] = _str;
+			data[$ _filenameToSet] = _str;
 		}
 		
 		return true;
@@ -102,15 +107,35 @@ function Cyg()
 
 	/// @desc Agrega un filename a los datos
 	/// @param {string} filename
-	static add = function(_key)
-	{
-		data[$ _key] = {};
+	/// @param {string} [key]
+	/// @param {any}    [value]
+	/// @param [...]
+	static add = function(_filename, _key, _value)
+	{	
+		if (_filename != undefined) {
+			var _file = {};
+			data[$ _filename] = _file;
+			
+			// Agregar datos
+			var i=1, _k, _v; repeat((argument_count - 1) div 2) {
+				_k = argument[i]; 
+				_v = argument[i + 1];
+				_file[$ _k] = _v;
+				
+				i = i + 2;
+			}
+		} 
+		else {
+			
+			
+			
+		}
 		return self;
 	}
 	
-	/// @param {string} filename
-	/// @param {String} key
-	/// @param {String} value
+	/// @param {string,undefined} filename
+	/// @param {string}           key
+	/// @param {any}              value
 	static set = function(_filename, _key, _value) 
 	{
 		// Guardar directamente
@@ -163,13 +188,21 @@ function Cyg()
 	}
 
 	/// @param {String} key
-	static remove = function(_key)
+	static removeData = function(_key)
 	{
 		var _r = data[$ _key];
 		variable_struct_remove(data, _key);
 		return _r;
 	}
+	
+	/// @param {string} filename
+	static removeFile = function(_filename) 
+	{
+		if (file_exists(_filename) ) {
+			file_delete(_filename);
+		}	
+	}
 }
 
 // Iniciar variables estaticas
-Cyg();
+cyg();
