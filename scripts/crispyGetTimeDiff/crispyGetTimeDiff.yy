@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"Cyg",
+  "%Name":"crispyGetTimeDiff",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"Cyg",
+  "name":"crispyGetTimeDiff",
   "parent":{
-    "name":"Cyg",
-    "path":"folders/Extensions/Cyg.yy",
+    "name":"Crispy",
+    "path":"folders/Crispy.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

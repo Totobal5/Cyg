@@ -1,34 +1,57 @@
 {
-  "resourceType": "GMProject",
-  "resourceVersion": "1.7",
-  "name": "Cyg",
-  "AudioGroups": [
-    {"resourceType":"GMAudioGroup","resourceVersion":"1.3","name":"audiogroup_default","targets":-1,},
+  "$GMProject":"v1",
+  "%Name":"Cyg",
+  "AudioGroups":[
+    {"$GMAudioGroup":"","%Name":"audiogroup_default","name":"audiogroup_default","resourceType":"GMAudioGroup","resourceVersion":"2.0","targets":-1,},
   ],
-  "configs": {
-    "children": [],
-    "name": "Default",
+  "configs":{
+    "children":[],
+    "name":"Default",
   },
-  "defaultScriptType": 1,
-  "Folders": [
-    {"resourceType":"GMFolder","resourceVersion":"1.0","name":"Extensions","folderPath":"folders/Extensions.yy",},
-    {"resourceType":"GMFolder","resourceVersion":"1.0","name":"Cyg","folderPath":"folders/Extensions/Cyg.yy",},
-    {"resourceType":"GMFolder","resourceVersion":"1.0","name":"Rooms","folderPath":"folders/Rooms.yy",},
+  "defaultScriptType":1,
+  "Folders":[
+    {"$GMFolder":"","%Name":"Crispy","folderPath":"folders/Crispy.yy","name":"Crispy","resourceType":"GMFolder","resourceVersion":"2.0",},
+    {"$GMFolder":"","%Name":"Extensions","folderPath":"folders/Extensions.yy","name":"Extensions","resourceType":"GMFolder","resourceVersion":"2.0",},
+    {"$GMFolder":"","%Name":"Cyg","folderPath":"folders/Extensions/Cyg.yy","name":"Cyg","resourceType":"GMFolder","resourceVersion":"2.0",},
+    {"$GMFolder":"","%Name":"Rooms","folderPath":"folders/Rooms.yy","name":"Rooms","resourceType":"GMFolder","resourceVersion":"2.0",},
   ],
-  "IncludedFiles": [],
-  "isEcma": false,
-  "LibraryEmitters": [],
-  "MetaData": {
-    "IDEVersion": "2023.400.0.324",
+  "ForcedPrefabProjectReferences":[],
+  "IncludedFiles":[],
+  "isEcma":false,
+  "LibraryEmitters":[],
+  "MetaData":{
+    "IDEVersion":"2024.13.1.193",
   },
-  "resources": [
-    {"id":{"name":"Cyg","path":"scripts/Cyg/Cyg.yy",},},
+  "name":"Cyg",
+  "resources":[
+    {"id":{"name":"Crispy_License","path":"notes/Crispy_License/Crispy_License.yy",},},
+    {"id":{"name":"Cyg_Licence","path":"notes/Cyg_Licence/Cyg_Licence.yy",},},
+    {"id":{"name":"o_cyg_manager","path":"objects/o_cyg_manager/o_cyg_manager.yy",},},
+    {"id":{"name":"o_cyg_test_suite","path":"objects/o_cyg_test_suite/o_cyg_test_suite.yy",},},
     {"id":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
+    {"id":{"name":"__crispy_config_macros","path":"scripts/__crispy_config_macros/__crispy_config_macros.yy",},},
+    {"id":{"name":"__crispyStructUnpack","path":"scripts/__crispyStructUnpack/__crispyStructUnpack.yy",},},
+    {"id":{"name":"BaseTestClass","path":"scripts/BaseTestClass/BaseTestClass.yy",},},
+    {"id":{"name":"crispyDebugMessage","path":"scripts/crispyDebugMessage/crispyDebugMessage.yy",},},
+    {"id":{"name":"crispyGetTime","path":"scripts/crispyGetTime/crispyGetTime.yy",},},
+    {"id":{"name":"crispyGetTimeDiff","path":"scripts/crispyGetTimeDiff/crispyGetTimeDiff.yy",},},
+    {"id":{"name":"crispyIsInternalVariable","path":"scripts/crispyIsInternalVariable/crispyIsInternalVariable.yy",},},
+    {"id":{"name":"CrispyLog","path":"scripts/CrispyLog/CrispyLog.yy",},},
+    {"id":{"name":"crispyMixinStructUnpack","path":"scripts/crispyMixinStructUnpack/crispyMixinStructUnpack.yy",},},
+    {"id":{"name":"crispyTimeConvert","path":"scripts/crispyTimeConvert/crispyTimeConvert.yy",},},
+    {"id":{"name":"Cyg","path":"scripts/Cyg/Cyg.yy",},},
+    {"id":{"name":"scr_cyg_test_suite","path":"scripts/scr_cyg_test_suite/scr_cyg_test_suite.yy",},},
+    {"id":{"name":"TestCase","path":"scripts/TestCase/TestCase.yy",},},
+    {"id":{"name":"TestRunner","path":"scripts/TestRunner/TestRunner.yy",},},
+    {"id":{"name":"TestSuite","path":"scripts/TestSuite/TestSuite.yy",},},
   ],
-  "RoomOrderNodes": [
+  "resourceType":"GMProject",
+  "resourceVersion":"2.0",
+  "RoomOrderNodes":[
     {"roomId":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
   ],
-  "TextureGroups": [
-    {"resourceType":"GMTextureGroup","resourceVersion":"1.3","name":"Default","autocrop":true,"border":2,"compressFormat":"bz2","directory":"","groupParent":null,"isScaled":true,"loadType":"default","mipsToGenerate":0,"targets":-1,},
+  "templateType":null,
+  "TextureGroups":[
+    {"$GMTextureGroup":"","%Name":"Default","autocrop":true,"border":2,"compressFormat":"bz2","customOptions":"","directory":"","groupParent":null,"isScaled":true,"loadType":"default","mipsToGenerate":0,"name":"Default","resourceType":"GMTextureGroup","resourceVersion":"2.0","targets":-1,},
   ],
 }

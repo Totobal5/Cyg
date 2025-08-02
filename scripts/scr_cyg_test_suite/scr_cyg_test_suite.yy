@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"Cyg",
+  "%Name":"scr_cyg_test_suite",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"Cyg",
+  "name":"scr_cyg_test_suite",
   "parent":{
     "name":"Cyg",
-    "path":"folders/Extensions/Cyg.yy",
+    "path":"Cyg.yyp",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

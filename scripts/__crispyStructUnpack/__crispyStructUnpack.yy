@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"Cyg",
+  "%Name":"__crispyStructUnpack",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"Cyg",
+  "name":"__crispyStructUnpack",
   "parent":{
-    "name":"Cyg",
-    "path":"folders/Extensions/Cyg.yy",
+    "name":"Crispy",
+    "path":"folders/Crispy.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

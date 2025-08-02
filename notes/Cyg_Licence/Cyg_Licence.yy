@@ -1,0 +1,11 @@
+{
+  "$GMNotes":"",
+  "%Name":"Cyg_Licence",
+  "name":"Cyg_Licence",
+  "parent":{
+    "name":"Cyg",
+    "path":"folders/Extensions/Cyg.yy",
+  },
+  "resourceType":"GMNotes",
+  "resourceVersion":"2.0",
+}

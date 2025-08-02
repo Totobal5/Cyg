@@ -1,4 +1,24 @@
 {
-  "FolderOrderSettings": [],
-  "ResourceOrderSettings": [],
+  "FolderOrderSettings":[
+    {"name":"Crispy","order":1,"path":"folders/Crispy.yy",},
+  ],
+  "ResourceOrderSettings":[
+    {"name":"Crispy_License","order":13,"path":"notes/Crispy_License/Crispy_License.yy",},
+    {"name":"Cyg_Licence","order":2,"path":"notes/Cyg_Licence/Cyg_Licence.yy",},
+    {"name":"o_cyg_manager","order":1,"path":"objects/o_cyg_manager/o_cyg_manager.yy",},
+    {"name":"o_cyg_test_suite","order":2,"path":"objects/o_cyg_test_suite/o_cyg_test_suite.yy",},
+    {"name":"__crispyStructUnpack","order":1,"path":"scripts/__crispyStructUnpack/__crispyStructUnpack.yy",},
+    {"name":"BaseTestClass","order":2,"path":"scripts/BaseTestClass/BaseTestClass.yy",},
+    {"name":"crispyDebugMessage","order":3,"path":"scripts/crispyDebugMessage/crispyDebugMessage.yy",},
+    {"name":"crispyGetTime","order":4,"path":"scripts/crispyGetTime/crispyGetTime.yy",},
+    {"name":"crispyGetTimeDiff","order":5,"path":"scripts/crispyGetTimeDiff/crispyGetTimeDiff.yy",},
+    {"name":"crispyIsInternalVariable","order":6,"path":"scripts/crispyIsInternalVariable/crispyIsInternalVariable.yy",},
+    {"name":"CrispyLog","order":7,"path":"scripts/CrispyLog/CrispyLog.yy",},
+    {"name":"crispyMixinStructUnpack","order":8,"path":"scripts/crispyMixinStructUnpack/crispyMixinStructUnpack.yy",},
+    {"name":"crispyTimeConvert","order":9,"path":"scripts/crispyTimeConvert/crispyTimeConvert.yy",},
+    {"name":"scr_cyg_test_suite","order":3,"path":"scripts/scr_cyg_test_suite/scr_cyg_test_suite.yy",},
+    {"name":"TestCase","order":10,"path":"scripts/TestCase/TestCase.yy",},
+    {"name":"TestRunner","order":11,"path":"scripts/TestRunner/TestRunner.yy",},
+    {"name":"TestSuite","order":12,"path":"scripts/TestSuite/TestSuite.yy",},
+  ],
 }

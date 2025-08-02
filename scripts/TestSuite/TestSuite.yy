@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"Cyg",
+  "%Name":"TestSuite",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"Cyg",
+  "name":"TestSuite",
   "parent":{
-    "name":"Cyg",
-    "path":"folders/Extensions/Cyg.yy",
+    "name":"Crispy",
+    "path":"folders/Crispy.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",
