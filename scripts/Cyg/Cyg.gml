@@ -1,4 +1,4 @@
-#macro __CYG_VERSION			"1.0"	// Versión de la librería actualizada
+#macro __CYG_VERSION			"2.0"
 #macro __CYG_USE_BACKUPS		true	// Si crea un backup (.bak) de los archivos creados
 #macro __CYG_USE_COMPRESS		false	// Si comprime los buffers antes de guardar.
 
@@ -26,7 +26,6 @@ function Cyg()
     /// @param {Buffer} buffer_data El buffer con los datos a procesar.
     /// @param {String} key La clave de cifrado.
 	/// @ignore 
-    /// @return {Buffer} Un nuevo buffer con los datos procesados.
     static __Cyg_RC4 = function(_buffer_data, _key)
     {
         // KSA (Key-Scheduling Algorithm): Inicialización del estado del cifrador.
@@ -482,6 +481,7 @@ function Cyg()
 		return false;
     }
 	
+	/// @desc Reinicia Cyg en su totalidad.
 	static Cleanup = function()
 	{
 	    static_get(Cyg).data = 
