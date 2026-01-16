@@ -1,4 +1,4 @@
-#macro __CYG_VERSION			"2.0"
+#macro __CYG_VERSION			"2.1"
 #macro __CYG_USE_BACKUPS		true	// Si crea un backup (.bak) de los archivos creados
 #macro __CYG_USE_COMPRESS		false	// Si comprime los buffers antes de guardar.
 
@@ -9,62 +9,76 @@
 function Cyg()
 {
 	/// @ignore Almacén principal de datos en memoria.
-    static data = 
+    static __data = 
 	{
-        __CygVersion: __CYG_VERSION,
-        __FileVersion: -1,
+        __cyg_version: __CYG_VERSION,
+        __file_version: -1,
     };
 	
     /// @ignore LLave de cifrado para las funciones de Export/Import.
-    static encryptKey = "";
+    static __custom_key = "";
+    
     /// @ignore Versión actual de los datos a guardar.
-    static version = -1;
+    static __version = -1;
 	/// @ignore Struct que almacena las funciones de migración (fixers) por versión.
-    static fixers = {};
-
+    static __fixers = {};
+    
     /// @desc Cifrado de flujo RC4. Es simétrico, por lo que se usa tanto para cifrar como para descifrar.
     /// @param {Buffer} buffer_data El buffer con los datos a procesar.
     /// @param {String} key La clave de cifrado.
 	/// @ignore 
     static __Cyg_RC4 = function(_buffer_data, _key)
     {
-        // KSA (Key-Scheduling Algorithm): Inicialización del estado del cifrador.
         var S = array_create(256);
-        for (var i = 0; i < 256; i++) { S[i] = i; }
+		var i = 0;
+        repeat(256) { S[i] = i; i++; }
 
         var j = 0;
-        var key_len = string_length(_key);
-        for (var i = 0; i < 256; i++)
+        var _key_len = string_length(_key);
+		
+		i = 0;
+        repeat(256)
         {
-            j = (j + S[i] + string_byte_at(_key, (i % key_len) + 1)) & 255;
-            var temp = S[i];
+            j = (j + S[i] + string_byte_at(_key, (i % _key_len) + 1)) & 255;
+            var _temp = S[i];
             S[i] = S[j];
-            S[j] = temp;
+            S[j] = _temp;
+			i++;
         }
 
-        // PRGA (Pseudo-Random Generation Algorithm): Generación del keystream y operación XOR.
-        var i = 0, j = 0;
-        var data_len = buffer_get_size(_buffer_data);
-        var result_buffer = buffer_create(data_len, buffer_fixed, 1);
-    
+        i = 0; 
+		j = 0;
+		
+		// RC4-Drop para fortalecer el cifrado contra ataques estadísticos.
+		repeat(256)
+		{
+			i = (i + 1) & 255;
+            j = (j + S[i]) & 255;
+            var _temp = S[i];
+            S[i] = S[j];
+            S[j] = _temp;
+		}
+
+        var _data_len = buffer_get_size(_buffer_data);
+        var _result_buffer = buffer_create(_data_len, buffer_fixed, 1);
         buffer_seek(_buffer_data, buffer_seek_start, 0);
 
-        for (var k = 0; k < data_len; k++)
+        repeat(_data_len)
         {
             i = (i + 1) & 255;
             j = (j + S[i]) & 255;
 
-            var temp = S[i];
+            var _temp = S[i];
             S[i] = S[j];
-            S[j] = temp;
+            S[j] = _temp;
 
-            var keystream_byte = S[(S[i] + S[j]) & 255];
-            var data_byte = buffer_read(_buffer_data, buffer_u8);
+            var _keystream_byte = S[(S[i] + S[j]) & 255];
+            var _data_byte = buffer_read(_buffer_data, buffer_u8);
         
-            buffer_write(result_buffer, buffer_u8, data_byte ^ keystream_byte);
+            buffer_write(_result_buffer, buffer_u8, _data_byte ^ _keystream_byte);
         }
     
-        return result_buffer;
+        return _result_buffer;
     }
 
     /// @desc Prepara el buffer de datos para exportar (cifra y/o comprime).
@@ -76,7 +90,7 @@ function Cyg()
 
         if (_encrypt)
 		{
-			var _encrypted_buffer = __Cyg_RC4(_temp_buffer, encryptKey);
+			var _encrypted_buffer = __Cyg_RC4(_temp_buffer, __custom_key);
 			buffer_delete(_temp_buffer);
 			_temp_buffer = _encrypted_buffer;
         }
@@ -117,7 +131,7 @@ function Cyg()
         
 		if (_encrypt)
 		{
-		    var _decrypted_buffer = __Cyg_RC4(_working_buffer, encryptKey);
+		    var _decrypted_buffer = __Cyg_RC4(_working_buffer, __custom_key);
 		    buffer_delete(_working_buffer);
 		    var _working_buffer = _decrypted_buffer;
 		}
@@ -134,7 +148,7 @@ function Cyg()
     {
 		if (instance_exists(o_cyg_manager) ) exit;
 		
-		show_debug_message("CYG INFO: Creando instancia de o_cyg_manager.");
+		show_debug_message("CYG PRINT: Creando instancia de o_cyg_manager.");
 		instance_create_layer(0, 0, "__CygInstances", o_cyg_manager);
     }
 
@@ -145,19 +159,19 @@ function Cyg()
 	    if (_key != undefined)
 		{
 	        var _value_to_save = Get(_key);
-			var _export_struct = { __CygVersion: __CYG_VERSION, __FileVersion: version, __data: _value_to_save };
+			var _export_struct = { __cyg_version: __CYG_VERSION, __file_version: __version, __data: _value_to_save };
 			
 			_string = json_stringify(_export_struct);
 	    } 
 		else 
 		{
-	        data.__FileVersion = version;
-	        _string = json_stringify(data);
+	        __data.__file_version = __version;
+	        _string = json_stringify(__data);
 	    }
         
-	    if (_encrypt && encryptKey == "")
+	    if (_encrypt && __custom_key == "")
 		{
-			show_debug_message("CYG WARNING: Se intentó cifrar sin 'encryptKey'.");	
+			show_debug_message($"CYG WARNING: Se intentó cifrar sin '__custom_key': {__custom_key}.");	
 	        _encrypt = false;
 	    }
 
@@ -197,9 +211,9 @@ function Cyg()
 		var _data_buffer = buffer_create(_data_size, buffer_fixed, 1);
 		buffer_copy(_loaded_buffer, _data_offset, _data_size, _data_buffer, 0);
 		
-		if (_encrypt && encryptKey == "") 
+		if (_encrypt && __custom_key == "") 
 		{
-			show_debug_message("CYG WARNING: Se intentó descifrar sin una 'encryptKey'.");
+			show_debug_message("CYG WARNING: Se intentó descifrar sin una '__custom_key'.");
             buffer_delete(_data_buffer);
 			return { success: false, data: undefined };
 		}
@@ -215,7 +229,7 @@ function Cyg()
 		}
 		
         var _file_version =	_parsed_data[$ "__FileVersion"] ?? -1;
-        var _fixer_func =	fixers[$ string(_file_version)] ?? DFix;
+        var _fixer_func =	__fixers[$ string(_file_version)] ?? DFix;
         var _data_to_fix =	struct_exists(_parsed_data, "__data") ? _parsed_data.__data : _parsed_data;
         var _final_data =	_fixer_func(_data_to_fix);
         
@@ -227,7 +241,7 @@ function Cyg()
     /// @return {self} Permite encadenar métodos.
     static SetVersion = function(_version)
     {
-        version = _version;
+        __version = _version;
         return self;
     }
     
@@ -236,7 +250,26 @@ function Cyg()
     /// @return {self} Permite encadenar métodos.
     static SetEncryptKey = function(_key)
     {
-        encryptKey = _key;
+        if (is_array(_key) )
+        {
+    		var _key_result = "";
+    		var _mask = 42; 
+    		var _i = 0;
+    		var _len = array_length(_key);
+    		
+    		repeat(_len)
+    		{
+    			_key_result += chr(_key[_i] ^ _mask);
+    			_i++;
+    		}
+    		
+    		__custom_key = _key_result;
+        }
+        else 
+        {
+        	__custom_key = _key;
+        }
+        
         return self;
     }
     
@@ -248,11 +281,11 @@ function Cyg()
 	{
 		if (!is_method(_callback) )
         {
-            show_debug_message($"CYG ERROR: El 'fixer' proporcionado para la versión {string(_version_key)} no es una función.");
+            show_debug_message($"CYG WARNING: El 'fixer' proporcionado para la versión {string(_version_key)} no es una función.");
 			return self;
         }
 		
-		fixers[$ string(_version_key)] = _callback;
+		__fixers[$ string(_version_key)] = _callback;
 		return self;
 	}
 	
@@ -289,8 +322,14 @@ function Cyg()
         
         if (_result.success) 
 		{
-            if (_key == undefined) { data = _result.data; } 
-            else { Add(_key, _result.data); }
+            if (_key == undefined) 
+            { 
+                __data = _result.data; 
+            } 
+            else 
+            { 
+                Add(_key, _result.data); 
+            }
         }
         
         return _result.success;
@@ -347,7 +386,8 @@ function Cyg()
             key:		_key,
             encrypt:	_encrypt,
             path:		_path,
-            buffer:     _target_buffer	// Se guarda la referencia al buffer de destino.
+            // Se guarda la referencia al buffer de destino.
+            buffer:     _target_buffer
         };
     }
 
@@ -382,8 +422,14 @@ function Cyg()
                 if (_result.success) 
 				{
                     _final_data = _result.data;
-                    if (_request.key == undefined) { data = _final_data; }
-                    else { Add(_request.key, _final_data); }
+                    if (_request.key == undefined)
+                    {
+                         __data = _final_data; 
+                    }
+                    else 
+                    {
+                         Add(_request.key, _final_data);
+                    }
                 }
 				
                 if (is_callable(_callback)) _callback(_result.success, _final_data);
@@ -409,7 +455,7 @@ function Cyg()
 			return true;
 		}
 		
-		show_debug_message($"CYG INFO: No se encontró un archivo de respaldo para '{_path}'.");
+		show_debug_message($"CYG ALERT: No se encontró un archivo de respaldo para '{_path}'.");
 		
 		return false;
     }
@@ -420,7 +466,7 @@ function Cyg()
     /// @return {self} Permite encadenar métodos.
     static Add = function(_key, _value)
     {
-        data[$ _key] = _value;
+        __data[$ _key] = _value;
 		
         return self;
     }
@@ -431,9 +477,9 @@ function Cyg()
     /// @return {Any} El valor encontrado o el valor por defecto.
     static Get = function(_key, _default=undefined)
     {
-        if (struct_exists(data, _key) )
+        if (struct_exists(__data, _key) )
         {
-            return data[$ _key];
+            return __data[$ _key];
         }
 		
         return _default;
@@ -444,7 +490,7 @@ function Cyg()
     /// @return {Bool} Devuelve 'true' si la clave existe.
     static Exists = function(_key)
     {
-        return struct_exists(data, _key);
+        return struct_exists(__data, _key);
     }
     
     /// @desc Elimina una clave y su valor asociado del almacén de datos.
@@ -452,9 +498,9 @@ function Cyg()
     /// @return {Any} Devuelve el valor que fue eliminado, o 'undefined' si no existía.
     static Remove = function(_key)
     {
-        if (struct_exists(data, _key) )
+        if (struct_exists(__data, _key) )
         {
-            return struct_remove(data, _key);
+            return struct_remove(__data, _key);
         }
 		
         return undefined;
@@ -484,10 +530,10 @@ function Cyg()
 	/// @desc Reinicia Cyg en su totalidad.
 	static Cleanup = function()
 	{
-	    static_get(Cyg).data = 
+	    static_get(Cyg).__data = 
 		{
-	        __CygVersion: __CYG_VERSION,
-	        __FileVersion: -1,
+	        __cyg_version: __CYG_VERSION,
+	        __file_version: -1,
 	    };
 	}
 }

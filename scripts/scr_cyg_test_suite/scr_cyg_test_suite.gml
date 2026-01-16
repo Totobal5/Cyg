@@ -50,7 +50,7 @@ function __cyg_test_sync_io(_runner)
 	
     // --- Configuración ---
     suite_sync.setUp(function() {
-        Cyg.SetEncryptKey("test_key");
+        Cyg.SetEncryptKey([110, 97, 88, 122, 107, 96, 77, 124, 83, 83, 30, 31, 125, 79, 25, 78, 29, 90, 126, 24, 66, 19, 124, 92, 93, 73, 89, 97, 78, 105, 108, 24] );
         Cyg.Add("player", { name: "Hero", level: 10 });
     });
 
