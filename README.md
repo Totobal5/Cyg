@@ -1,52 +1,52 @@
 # Cyg
 
-Sistema de guardado simple para GameMaker (GML).
+Simple save system for GameMaker (GML).
 
-## Cómo se usa
+## How to use
 
 ```gml
-// Agregar datos
+// Add data
 Cyg.Add("player_name", "Toto");
 Cyg.Add("level", 5);
 Cyg.Add("inventory", ["sword", "potion"]);
 
-// Guardar
+// Save
 Cyg.Export("save_file");
 
-// Cargar
+// Load
 Cyg.Import("save_file");
 
-// Leer datos
+// Read data
 var name = Cyg.Get("player_name");
 var level = Cyg.Get("level");
 ```
-Los datos se guardan en archivos JSON y se cargan cuando los necesitas.
+Data is saved to JSON files and loaded when you need it.
 
 ## Features
 
-**Guardado y carga básicos**
-- Usa JSON como formato base
-- API simple: `Add()`, `Export()`, `Import()`, `Get()`
+**Basic save and load**
+- Uses JSON as the base format
+- Simple API: `Add()`, `Export()`, `Import()`, `Get()`
 
-**Seguridad y optimización**
-- Encriptación RC4 opcional
-- Compresión de archivos para reducir tamaño
+**Security and optimization**
+- Optional RC4 encryption
+- File compression to reduce size
 
-**Fixers (migraciones)**
-- Sistema para migrar partidas guardadas cuando actualizas tu juego
-- Útil si cambias la estructura de datos entre versiones
-- Define un fixer y Cyg lo aplica automáticamente al cargar
+**Fixers (migrations)**
+- System to migrate save files when you update your game
+- Useful if you change the data structure between versions
+- Define a fixer and Cyg applies it automatically on load
 
-**Respaldo automático**
-- Crea archivos `.bak` antes de sobrescribir
-- Guardado asíncrono disponible
+**Automatic backups**
+- Creates `.bak` files before overwriting
+- Async saving available
 
-## Instalación
+## Installation
 
-1. Descarga los scripts de la carpeta `scripts/`
-2. Importa el archivo `.yymps` en tu proyecto de GameMaker
-3. Usa `Cyg.Add()` y `Cyg.Export()` en tu código
+1. Download the scripts from the `scripts/` folder
+2. Import the `.yymps` file into your GameMaker project
+3. Use `Cyg.Add()` and `Cyg.Export()` in your code
 
-## Licencia
+## License
 
 [MIT](https://github.com/Totobal5/Cyg/blob/main/LICENSE)

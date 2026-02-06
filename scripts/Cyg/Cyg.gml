@@ -1,6 +1,15 @@
-#macro __CYG_VERSION			"2.1"
-#macro __CYG_USE_BACKUPS		true	// Si crea un backup (.bak) de los archivos creados
-#macro __CYG_USE_COMPRESS		false	// Si comprime los buffers antes de guardar.
+/// @ignore [MAJOR-MINOR-PATCH]
+#macro __CYG_VERSION			"3.0.0"
+/// @ignore
+#macro __CYG_DEBUG_ERRORS		true
+/// @ignore
+#macro __CYG_DEBUG_WARNINGS	    true
+/// @ignore Si crea un backup (.bak) de los archivos creados.
+#macro __CYG_USE_BACKUPS		true
+/// @ignore Si comprime los buffers antes de guardar.
+#macro __CYG_USE_COMPRESS		false
+
+show_debug_message($"CYG INFO: Cyg v {__CYG_VERSION}. Made by toto.");
 
 /// @desc Sistema de guardado y carga de datos simple y robusto.
 /// Permite gestionar datos de juego, guardarlos en formato JSON,
@@ -124,7 +133,7 @@ function Cyg()
 			} 
 			else 
 			{
-				show_debug_message("CYG WARNING: La descompresión falló. Tratando los datos como no comprimidos.");
+				if (__CYG_DEBUG_WARNINGS) show_debug_message("CYG WARNING: La descompresión falló. Tratando los datos como no comprimidos.");
 				buffer_delete(_decompressed_buffer);
 		    }
 		}
@@ -146,10 +155,15 @@ function Cyg()
     /// @ignore Se asegura de que el objeto gestor exista en el juego.
     static __Cyg_Init_Manager = function()
     {
-		if (instance_exists(o_cyg_manager) ) exit;
-		
-		show_debug_message("CYG PRINT: Creando instancia de o_cyg_manager.");
-		instance_create_layer(0, 0, "__CygInstances", o_cyg_manager);
+        if (!instance_exists(o_cyg_manager) )
+        {
+            if (__CYG_DEBUG_WARNINGS) show_debug_message("CYG INFO: Creando instancia de o_cyg_manager.");
+            instance_create_depth(0, 0, -10000, o_cyg_manager);
+        }
+        else
+        {
+            instance_activate_object(o_cyg_manager);
+        }
     }
 
 	/// @ignore Construye el buffer final listo para ser guardado.
@@ -169,11 +183,11 @@ function Cyg()
 	        _string = json_stringify(__data);
 	    }
         
-	    if (_encrypt && __custom_key == "")
-		{
-			show_debug_message($"CYG WARNING: Se intentó cifrar sin '__custom_key': {__custom_key}.");	
-	        _encrypt = false;
-	    }
+        if (_encrypt && __custom_key == "")
+        {
+            if (__CYG_DEBUG_WARNINGS) show_debug_message("CYG WARNING: Se intentó cifrar sin '__custom_key'.");
+            _encrypt = false;
+        }
 
 	    var _data_buffer =	__Cyg_Prepare_Data_Buffer(_string, _encrypt, _compress);
 	    var _hash =			buffer_md5(_data_buffer, 0, buffer_get_size(_data_buffer) );
@@ -197,26 +211,26 @@ function Cyg()
         
         if (_data_size <= 0) 
 		{
-			show_debug_message($"CYG ERROR: Archivo '{_path}' está vacío o corrupto.");
+			if (__CYG_DEBUG_ERRORS) show_debug_message($"CYG ERROR: Archivo '{_path}' está vacío o corrupto.");
 			return { success: false, data: undefined };
         }
         
 		var _calculated_hash = buffer_md5(_loaded_buffer, _data_offset, _data_size);
 		if (_saved_hash != _calculated_hash) 
 		{
-			show_debug_message($"CYG ERROR: ¡Checksum fallido! El archivo '{_path}' está corrupto o modificado.");
+			if (__CYG_DEBUG_ERRORS) show_debug_message($"CYG ERROR: ¡Checksum fallido! El archivo '{_path}' está corrupto o modificado.");
 			return { success: false, data: undefined };
 		}
         
 		var _data_buffer = buffer_create(_data_size, buffer_fixed, 1);
 		buffer_copy(_loaded_buffer, _data_offset, _data_size, _data_buffer, 0);
 		
-		if (_encrypt && __custom_key == "") 
-		{
-			show_debug_message("CYG WARNING: Se intentó descifrar sin una '__custom_key'.");
+        if (_encrypt && __custom_key == "") 
+        {
+            if (__CYG_DEBUG_WARNINGS) show_debug_message("CYG WARNING: Se intentó descifrar sin una '__custom_key'.");
             buffer_delete(_data_buffer);
-			return { success: false, data: undefined };
-		}
+            return { success: false, data: undefined };
+        }
         
 		var _string = __Cyg_Extract_Data_String(_data_buffer, _encrypt, _compress);
         buffer_delete(_data_buffer);
@@ -224,7 +238,7 @@ function Cyg()
 		
 		if (!is_struct(_parsed_data) && !is_array(_parsed_data) ) 
 		{
-			show_debug_message($"CYG WARNING: El archivo importado '{_path}' no contiene un JSON válido.");
+			if (__CYG_DEBUG_WARNINGS) show_debug_message($"CYG WARNING: El archivo importado '{_path}' no contiene un JSON válido.");
 			return { success: false, data: undefined };
 		}
 		
@@ -281,7 +295,7 @@ function Cyg()
 	{
 		if (!is_method(_callback) )
         {
-            show_debug_message($"CYG WARNING: El 'fixer' proporcionado para la versión {string(_version_key)} no es una función.");
+            if (__CYG_DEBUG_ERRORS) show_debug_message($"CYG ERROR: El 'fixer' proporcionado para la versión {string(_version_key)} no es una función.");
 			return self;
         }
 		
@@ -289,58 +303,12 @@ function Cyg()
 		return self;
 	}
 	
-    /// @desc Guarda datos en un archivo, con opción de cifrado.
-    /// @param {String} path La ruta completa donde se guardará el archivo (ej: "save/slot1.sav").
-    /// @param {String} [key] Clave del struct a guardar. Si es 'undefined', se guarda toda la data.
-    /// @param {Bool}   [encrypt] Si es 'true', se cifrarán los datos. Default: false.
-    static Export = function(_path, _key=undefined, _encrypt=false)
-    {
-        if (__CYG_USE_BACKUPS && file_exists(_path) ) 
-		{
-            var _backup_path = _path + ".bak";
-            if (file_exists(_backup_path)) { file_delete(_backup_path); }
-			file_rename(_path, _backup_path);
-        }
-        
-        var _final_buffer = __Cyg_Build_Export_Buffer(_key, _encrypt, __CYG_USE_COMPRESS);
-        buffer_save(_final_buffer, _path);
-        buffer_delete(_final_buffer);
-    }
-    
-    /// @desc Carga datos desde un archivo, aplicando fixers si es necesario.
-    /// @param {String} path La ruta completa del archivo a cargar (ej: "save/slot1.sav").
-    /// @param {String} [key] Clave donde se guardarán los datos. Si es 'undefined', reemplaza toda la data.
-    /// @param {Bool}   [encrypt] Si es 'true', se intentarán descifrar los datos. Default: false.
-    /// @return {Bool} Devuelve 'true' si la carga fue exitosa, 'false' en caso contrario.
-    static Import = function(_path, _key=undefined, _encrypt=false)
-    {
-		if (!file_exists(_path) ) return false;
-		
-        var _loaded_buffer = buffer_load(_path);
-        var _result = __Cyg_Process_Import_Buffer(_loaded_buffer, _path, _encrypt, __CYG_USE_COMPRESS);
-        buffer_delete(_loaded_buffer);
-        
-        if (_result.success) 
-		{
-            if (_key == undefined) 
-            { 
-                __data = _result.data; 
-            } 
-            else 
-            { 
-                Add(_key, _result.data); 
-            }
-        }
-        
-        return _result.success;
-    }
-
     /// @desc Guarda datos en un archivo de forma ASÍNCRONA.
     /// @param {String} path La ruta completa del archivo.
     /// @param {String} [key] Clave de los datos a guardar.
     /// @param {Bool}   [encrypt] Activa el cifrado.
     /// @param {Method} callback Función a llamar al finalizar. Recibe un argumento: (success:Bool).
-    static ExportAsync = function(_path, _key=undefined, _encrypt=false, _callback=undefined)
+    static Export = function(_path, _key=undefined, _encrypt=false, _callback=undefined)
     {
         __Cyg_Init_Manager();
         if (__CYG_USE_BACKUPS && file_exists(_path) ) 
@@ -366,7 +334,7 @@ function Cyg()
     /// @param {String} [key] Clave donde se guardarán los datos.
     /// @param {Bool}   [encrypt] Activa el descifrado.
     /// @param {Method} callback Función a llamar al finalizar. Recibe dos argumentos: (success:Bool, data:Any).
-    static ImportAsync = function(_path, _key=undefined, _encrypt=false, _callback=undefined)
+    static Import = function(_path, _key=undefined, _encrypt=false, _callback=undefined)
     {
 		__Cyg_Init_Manager();
         
@@ -447,15 +415,15 @@ function Cyg()
     static RestoreBackup = function(_path)
     {
 		var _backup_path = _path + ".bak";
-		if (__CYG_USE_BACKUPS && file_exists(_backup_path) ) 
-		{
-			if (file_exists(_path) ) file_delete(_path);
-			file_rename(_backup_path, _path);
+        if (__CYG_USE_BACKUPS && file_exists(_backup_path) ) 
+        {
+            if (file_exists(_path) ) file_delete(_path);
+            file_rename(_backup_path, _path);
 			
-			return true;
-		}
+            return true;
+        }
 		
-		show_debug_message($"CYG ALERT: No se encontró un archivo de respaldo para '{_path}'.");
+        if (__CYG_DEBUG_WARNINGS) show_debug_message($"CYG INFO: No se encontró un archivo de respaldo para '{_path}'.");
 		
 		return false;
     }
