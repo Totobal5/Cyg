@@ -31,6 +31,8 @@ function Cyg()
     static __version = -1;
 	/// @ignore Struct que almacena las funciones de migración (fixers) por versión.
     static __fixers = {};
+	/// @ignore DS Map para rastrear las operaciones asíncronas pendientes.
+	static async_requests = ds_map_create();
     
     /// @desc Cifrado de flujo RC4. Es simétrico, por lo que se usa tanto para cifrar como para descifrar.
     /// @param {Buffer} buffer_data El buffer con los datos a procesar.
@@ -310,6 +312,7 @@ function Cyg()
     /// @param {Method} callback Función a llamar al finalizar. Recibe un argumento: (success:Bool).
     static Export = function(_path, _key=undefined, _encrypt=false, _callback=undefined)
     {
+        show_debug_message("CYG DEBUG: Export iniciado, path=" + _path + ", key=" + string(_key) + ", encrypt=" + string(_encrypt));
         __Cyg_Init_Manager();
         if (__CYG_USE_BACKUPS && file_exists(_path) ) 
 		{
@@ -321,6 +324,7 @@ function Cyg()
         var _final_buffer =	__Cyg_Build_Export_Buffer(_key, _encrypt, __CYG_USE_COMPRESS);
         var _size =			buffer_get_size(_final_buffer);
         var _async_id =		buffer_save_async(_final_buffer, _path, 0, _size);
+        show_debug_message("CYG DEBUG: Export async_id=" + string(_async_id) + ", buffer_size=" + string(_size));
         
         async_requests[? _async_id] = {
             type:		"export",
@@ -336,6 +340,7 @@ function Cyg()
     /// @param {Method} callback Función a llamar al finalizar. Recibe dos argumentos: (success:Bool, data:Any).
     static Import = function(_path, _key=undefined, _encrypt=false, _callback=undefined)
     {
+        show_debug_message("CYG DEBUG: Import iniciado, path=" + _path + ", file_exists=" + string(file_exists(_path)) + ", key=" + string(_key));
 		__Cyg_Init_Manager();
         
 		if (!file_exists(_path) ) 
@@ -347,6 +352,7 @@ function Cyg()
         // Se crea un buffer para que la función asíncrona cargue los datos en él.
         var _target_buffer = buffer_create(1, buffer_grow, 1);
         var _async_id = buffer_load_async(_target_buffer, _path, 0, -1);
+        show_debug_message("CYG DEBUG: Import async_id=" + string(_async_id) + ", created buffer");
         
         async_requests[? _async_id] = {
             type:		"import",
@@ -372,12 +378,12 @@ function Cyg()
         
         if (_request.type == "export") 
 		{
+            show_debug_message("CYG DEBUG: ProcessAsyncEvent export, status=" + string(_status));
             buffer_delete(_request.buffer);
             if (is_callable(_callback)) _callback(_status);
         } 
 		else if (_request.type == "import")
-		{
-            var _loaded_buffer = _request.buffer;
+		{            show_debug_message("CYG DEBUG: ProcessAsyncEvent import, status=" + string(_status));            var _loaded_buffer = _request.buffer;
             var _final_data = undefined;
             
             if (!_status) 
@@ -386,7 +392,9 @@ function Cyg()
             } 
 			else
 			{
+                show_debug_message("CYG DEBUG: Import buffer processing, size=" + string(buffer_get_size(_loaded_buffer)));
                 var _result = __Cyg_Process_Import_Buffer(_loaded_buffer, _request.path, _request.encrypt, __CYG_USE_COMPRESS);
+                show_debug_message("CYG DEBUG: Import result.success=" + string(_result.success));
                 if (_result.success) 
 				{
                     _final_data = _result.data;
