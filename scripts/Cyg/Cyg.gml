@@ -1,29 +1,34 @@
 /// @ignore [MAJOR-MINOR-PATCH]
-#macro __CYG_VERSION			"4.0.0"
+#macro __CYG_VERSION			"4.0.1"
+
 /// @ignore Show warning messages in the console.
 #macro __CYG_DEBUG_WARNINGS		true
+
 /// @ignore Show error messages in the console.
 #macro __CYG_DEBUG_ERRORS		true
+
 /// @ignore If true, fatal errors crash the game.
 #macro __CYG_STRICT_MODE		false
+
 /// @ignore Whether to create a backup (.bak) before overwriting save files.
 #macro __CYG_USE_BACKUPS		true
+
 /// @ignore Whether to compress buffers before saving.
 #macro __CYG_USE_COMPRESS		false
-/// @ignore Default master key for ChaCha20-Poly1305 (32 ASCII bytes in an array).
-#macro CYG_MASTER_KEY			[67, 89, 71, 95, 77, 65, 83, 84, 69, 82, 95, 75, 69, 89, 95, 68, 69, 70, 65, 85, 76, 84, 95, 51, 50, 95, 66, 89, 84, 69, 83, 33]
 
 /// @ignore XOR mask used to obfuscate encryption keys when provided as a byte array. This is not a security mechanism, only light obfuscation to avoid plain-text keys in code.
 #macro __CYG_XOR_MASK			42
+
 /// @ignore Depth used when creating the Cyg manager object.
 #macro __CYG_MANAGER_DEPTH		-10000
 
+/// @ignore Default master key for ChaCha20-Poly1305 (32 ASCII bytes in an array).
+#macro CYG_MASTER_KEY			[67, 89, 71, 95, 77, 65, 83, 84, 69, 82, 95, 75, 69, 89, 95, 68, 69, 70, 65, 85, 76, 84, 95, 51, 50, 95, 66, 89, 84, 69, 83, 33]
+
 show_debug_message($"Cyg: Cyg v{__CYG_VERSION}. Made by toto.");
 
-/// @desc Simple and robust save/load system.
-/// Manages game data, stores it as JSON,
-/// supports optional encryption,
-/// and handles save migrations through fixer functions.
+/// @desc Simple and robust save/load system. Manages game data, stores it as JSON,
+/// supports optional encryption, and handles save migrations through fixer functions.
 function Cyg()
 {
 	/// @ignore Main in-memory data store.
@@ -426,20 +431,20 @@ function Cyg()
 			{
 				__cyg_alert("Decompression failed. Treating data as uncompressed.");
 				buffer_delete(_decompressed_buffer);
-		    }
+			}
 		}
         
 		if (_encrypt)
 		{
 			var _effective_key = __Cyg_Get_Effective_Key();
-		    var _decrypted_buffer = __Cyg_ChaCha_Decrypt_Packed(_working_buffer, _effective_key);
+			var _decrypted_buffer = __Cyg_ChaCha_Decrypt_Packed(_working_buffer, _effective_key);
 			if (is_undefined(_decrypted_buffer))
 			{
 				buffer_delete(_working_buffer);
 				return "";
 			}
-		    buffer_delete(_working_buffer);
-		    var _working_buffer = _decrypted_buffer;
+			buffer_delete(_working_buffer);
+			var _working_buffer = _decrypted_buffer;
 		}
         
 		buffer_seek(_working_buffer, buffer_seek_start, 0);
@@ -466,19 +471,19 @@ function Cyg()
 	/// @ignore Builds the final buffer ready to be saved.
 	static __Cyg_Build_Export_Buffer = function(_key, _encrypt, _compress)
 	{
-	    var _string;
-	    if (_key != undefined)
+		var _string;
+		if (_key != undefined)
 		{
-	        var _value_to_save = Get(_key);
+			var _value_to_save = Get(_key);
 			var _export_struct = { __cyg_version: __CYG_VERSION, __file_version: __version, __data: _value_to_save };
 			
 			_string = json_stringify(_export_struct);
-	    } 
+		} 
 		else 
 		{
-	        __data.__file_version = __version;
-	        _string = json_stringify(__data);
-	    }
+			__data.__file_version = __version;
+			_string = json_stringify(__data);
+		}
         
         if (_encrypt && !__Cyg_Has_Encryption_Key())
         {
@@ -486,19 +491,19 @@ function Cyg()
             _encrypt = false;
         }
 
-	    var _data_buffer =	__Cyg_Prepare_Data_Buffer(_string, _encrypt, _compress);
+		var _data_buffer =	__Cyg_Prepare_Data_Buffer(_string, _encrypt, _compress);
 		if (is_undefined(_data_buffer))
 		{
 			return undefined;
 		}
-	    var _hash =			cyg_sha256_buffer(_data_buffer, 0, buffer_get_size(_data_buffer));
-	    var _final_buffer =	buffer_create(1, buffer_grow, 1);
+		var _hash =			cyg_sha256_buffer(_data_buffer, 0, buffer_get_size(_data_buffer));
+		var _final_buffer =	buffer_create(1, buffer_grow, 1);
         
-	    buffer_write(_final_buffer, buffer_string, _hash);
-	    buffer_copy(_data_buffer, 0, buffer_get_size(_data_buffer), _final_buffer, buffer_tell(_final_buffer));
-	    buffer_delete(_data_buffer);
+		buffer_write(_final_buffer, buffer_string, _hash);
+		buffer_copy(_data_buffer, 0, buffer_get_size(_data_buffer), _final_buffer, buffer_tell(_final_buffer));
+		buffer_delete(_data_buffer);
         
-	    return _final_buffer;
+		return _final_buffer;
 	}
     
 	/// @ignore Processes a loaded buffer and returns final data.
@@ -1047,7 +1052,7 @@ function cyg_sha256_buffer(_buffer, _offset = 0, _size = -1)
 	var _h6 = 0x1F83D9AB;
 	var _h7 = 0x5BE0CD19;
 
-	var _k = [
+	static _k = [
 		0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
 		0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3, 0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174,
 		0xE49B69C1, 0xEFBE4786, 0x0FC19DC6, 0x240CA1CC, 0x2DE92C6F, 0x4A7484AA, 0x5CB0A9DC, 0x76F988DA,
@@ -1118,7 +1123,7 @@ function cyg_sha256_buffer(_buffer, _offset = 0, _size = -1)
 		_h7 = (_h7 + _h) & 0xFFFFFFFF;
 	}
 
-	var _hex = "0123456789abcdef";
+	static _hex = "0123456789abcdef";
 	var _out = "";
 	var _words = [_h0, _h1, _h2, _h3, _h4, _h5, _h6, _h7];
 	for (var _w_i = 0; _w_i < 8; ++_w_i)

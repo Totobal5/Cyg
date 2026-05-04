@@ -4,9 +4,7 @@ A save system for GameMaker designed to make saving and loading painless.
 
 If you want to stop fighting files, formats, and load errors, Cyg gives you a short clear API.
 
-Current release: v4.0.0
-
-Honesty note: Cyg has not yet been used by me in a production game.
+Note: Cyg has not yet been used by me in a production game.
 
 ## Why Use Cyg
 
