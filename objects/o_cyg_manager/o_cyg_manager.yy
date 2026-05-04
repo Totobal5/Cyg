@@ -9,7 +9,7 @@
   "overriddenProperties":[],
   "parent":{
     "name":"Cyg",
-    "path":"folders/Extensions/Cyg.yy",
+    "path":"folders/Cyg.yy",
   },
   "parentObjectId":null,
   "persistent":true,

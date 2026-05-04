@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"Cyg",
+  "%Name":"Cyg_Tests",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"Cyg",
+  "name":"Cyg_Tests",
   "parent":{
     "name":"Cyg",
     "path":"folders/Cyg.yy",

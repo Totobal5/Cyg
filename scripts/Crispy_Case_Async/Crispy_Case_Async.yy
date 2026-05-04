@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"Cyg",
+  "%Name":"Crispy_Case_Async",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"Cyg",
+  "name":"Crispy_Case_Async",
   "parent":{
-    "name":"Cyg",
-    "path":"folders/Cyg.yy",
+    "name":"Crispy",
+    "path":"folders/Crispy.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

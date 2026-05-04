@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"Cyg",
+  "%Name":"crispy_Functions",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"Cyg",
+  "name":"crispy_Functions",
   "parent":{
-    "name":"Cyg",
-    "path":"folders/Cyg.yy",
+    "name":"Crispy",
+    "path":"folders/Crispy.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

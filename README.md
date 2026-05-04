@@ -1,51 +1,70 @@
 # Cyg
 
-Simple save system for GameMaker (GML).
+A save system for GameMaker designed to make saving and loading painless.
 
-## How to use
+If you want to stop fighting files, formats, and load errors, Cyg gives you a short, clear API that is ready for production.
+
+Current release: v4.0.0
+
+## Why Use Cyg
+
+- Save and load in just a few lines.
+- Data is stored as JSON (easy to inspect and debug).
+- Turn modern encryption on when you need it (ChaCha20-Poly1305).
+- SHA-256 integrity checks protect against accidental or malicious file tampering.
+- Automatic timestamped backups help protect player progress.
+- Built-in versioning and migration support keep old saves compatible.
+
+## Quick Start
 
 ```gml
-// Add data
+// 1) Store values
 Cyg.Add("player_name", "Toto");
 Cyg.Add("level", 5);
 Cyg.Add("inventory", ["sword", "potion"]);
 
-// Save
+// 2) Save to disk
 Cyg.Export("save_file");
 
-// Load
+// 3) Load later
 Cyg.Import("save_file");
 
-// Read data
+// 4) Read values
 var name = Cyg.Get("player_name");
 var level = Cyg.Get("level");
 ```
-Data is saved to JSON files and loaded when you need it.
 
-## Features
+## Simple Encryption Setup
 
-**Basic save and load**
-- Uses JSON as the base format
-- Simple API: `Add()`, `Export()`, `Import()`, `Get()`
+Define one master key as an ASCII byte array:
 
-**Security and optimization**
-- Optional RC4 encryption
-- File compression to reduce size
+```gml
+#macro CYG_MASTER_KEY [43, 20, 10, 43, 48, ...]
+```
 
-**Fixers (migrations)**
-- System to migrate save files when you update your game
-- Useful if you change the data structure between versions
-- Define a fixer and Cyg applies it automatically on load
+Then enable encryption with the same flow you already use:
 
-**Automatic backups**
-- Creates `.bak` files before overwriting
-- Async saving available
+```gml
+Cyg.Export("save_file", undefined, true);
+Cyg.Import("save_file", undefined, true);
+```
+
+That is it. Cyg handles the rest.
+
+## What You Get
+
+- Async save/load operations.
+- Optional authenticated encryption (ChaCha20-Poly1305).
+- Optional compression.
+- SHA-256 file integrity checks.
+- Automatic backups with timestamp history.
+- Versioned fixers for save migrations.
 
 ## Installation
 
-1. Download the scripts from the `scripts/` folder
-2. Import the `.yymps` file into your GameMaker project
-3. Use `Cyg.Add()` and `Cyg.Export()` in your code
+1. Download the `scripts/` folder.
+2. Import the `.yymps` package into your GameMaker project.
+3. Start using `Cyg.Add()`, `Cyg.Export()`, `Cyg.Import()`, and `Cyg.Get()`.
 
 ## License
 
