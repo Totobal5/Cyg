@@ -1,5 +1,5 @@
 /// @ignore [MAJOR-MINOR-PATCH]
-#macro __CYG_VERSION			"4.0.1"
+#macro __CYG_VERSION			"4.0.3"
 
 /// @ignore Show warning messages in the console.
 #macro __CYG_DEBUG_WARNINGS		true
@@ -25,34 +25,34 @@
 /// @ignore Default master key for ChaCha20-Poly1305 (32 ASCII bytes in an array).
 #macro CYG_MASTER_KEY			[67, 89, 71, 95, 77, 65, 83, 84, 69, 82, 95, 75, 69, 89, 95, 68, 69, 70, 65, 85, 76, 84, 95, 51, 50, 95, 66, 89, 84, 69, 83, 33]
 
-show_debug_message($"Cyg: Cyg v{__CYG_VERSION}. Made by toto.");
+show_debug_message($"Cyg Alert:: Cyg v{__CYG_VERSION}. Made by toto.");
 
 /// @desc Simple and robust save/load system. Manages game data, stores it as JSON,
 /// supports optional encryption, and handles save migrations through fixer functions.
 function Cyg()
 {
 	/// @ignore Main in-memory data store.
-    static __data = 
+	static __data = 
 	{
-        __cyg_version: __CYG_VERSION,
-        __file_version: -1,
-    };
+		__cyg_version: __CYG_VERSION,
+		__file_version: -1,
+	};
 	
 	/// @ignore Encryption key used by Export/Import.
 	static __custom_key = undefined;
-    
+	
 	/// @ignore Current save-data version.
-    static __version = -1;
+	static __version = -1;
 
 	/// @ignore Struct that stores migration fixer functions per version.
-    static __fixers = {};
+	static __fixers = {};
 
 	/// @ignore Avoids repeating warnings for invalid master keys.
 	static __master_key_warned = false;
 
 	/// @ignore DS map used to track pending async operations.
 	static async_requests = ds_map_create();
-    
+	
 	#region Private Methods
 
 	/// @ignore Converts a byte array into a string.
@@ -61,12 +61,10 @@ function Cyg()
 		if (!is_array(_bytes) || array_length(_bytes) <= 0) return "";
 
 		var _key = "";
-		var i = 0;
-		repeat(array_length(_bytes))
+		var i = 0; repeat(array_length(_bytes))
 		{
-			var _ascii = ((_bytes[i] & 255) mod 95) + 32;
+			var _ascii = ((_bytes[i++] & 255) mod 95) + 32;
 			_key += chr(_ascii);
-			i++;
 		}
 
 		return _key;
@@ -81,25 +79,23 @@ function Cyg()
 		if (_src_len == 32) return _source_key;
 
 		var _out = array_create(32, 0);
-		var i = 0;
-		repeat(32)
+		var i = 0; repeat(32)
 		{
 			var _src = string_byte_at(_source_key, (i mod _src_len) + 1);
 			_out[i] = (_src + ((i * 73) & 255) + ((_src_len * 17) & 255)) & 255;
 			i++;
 		}
 
-		var _round = 0;
-		repeat(4)
+		var _round = 0; repeat(4)
 		{
-			i = 0;
-			repeat(32)
+			i = 0; repeat(32)
 			{
 				var _mix = string_byte_at(_source_key, ((i + _round) mod _src_len) + 1);
 				var _prev = _out[(i + 31) mod 32];
 				_out[i] = (_out[i] ^ ((_mix + _prev + i + (_round * 11)) & 255)) & 255;
 				i++;
 			}
+
 			_round++;
 		}
 
@@ -112,13 +108,11 @@ function Cyg()
 		if (!is_array(CYG_MASTER_KEY)) return false;
 		if (array_length(CYG_MASTER_KEY) != 32) return false;
 
-		var i = 0;
-		repeat(32)
+		var i = 0; repeat(32)
 		{
-			var _b = CYG_MASTER_KEY[i];
+			var _b = CYG_MASTER_KEY[i++];
 			if (!is_real(_b)) return false;
 			if (_b < 0 || _b > 255) return false;
-			i++;
 		}
 
 		return true;
@@ -156,13 +150,7 @@ function Cyg()
 	static __Cyg_Generate_Nonce = function()
 	{
 		var _nonce = "";
-		var i = 0;
-		repeat(12)
-		{
-			_nonce += chr(irandom_range(32, 126));
-			i++;
-		}
-
+		repeat(12) { _nonce += chr(irandom_range(32, 126)); }
 		return _nonce;
 	}
 
@@ -382,12 +370,12 @@ function Cyg()
 
 	/// @desc Prepares data buffer for export (encrypt and/or compress).
 	/// @ignore
-    static __Cyg_Prepare_Data_Buffer = function(_string, _encrypt, _compress)
-    {
-        var _temp_buffer = buffer_create(string_byte_length(_string) + 1, buffer_fixed, 1);
-        buffer_write(_temp_buffer, buffer_string, _string);
+	static __Cyg_Prepare_Data_Buffer = function(_string, _encrypt, _compress)
+	{
+		var _temp_buffer = buffer_create(string_byte_length(_string) + 1, buffer_fixed, 1);
+		buffer_write(_temp_buffer, buffer_string, _string);
 
-        if (_encrypt)
+		if (_encrypt)
 		{
 			var _effective_key = __Cyg_Get_Effective_Key();
 			var _encrypted_buffer = __Cyg_ChaCha_Encrypt_Packed(_temp_buffer, _effective_key);
@@ -398,24 +386,24 @@ function Cyg()
 			}
 			buffer_delete(_temp_buffer);
 			_temp_buffer = _encrypted_buffer;
-        }
+		}
 
 		if (_compress) 
 		{
-            var _size = buffer_get_size(_temp_buffer);
-            var _compressed_buffer = buffer_compress(_temp_buffer, 0, _size);
+			var _size = buffer_get_size(_temp_buffer);
+			var _compressed_buffer = buffer_compress(_temp_buffer, 0, _size);
 			
-            buffer_delete(_temp_buffer);
-            _temp_buffer = _compressed_buffer;
-        }
+			buffer_delete(_temp_buffer);
+			_temp_buffer = _compressed_buffer;
+		}
 
-        return _temp_buffer;
-    }
+		return _temp_buffer;
+	}
 
 	/// @desc Extracts JSON string from the loaded buffer (decompress and/or decrypt).
 	/// @ignore
-    static __Cyg_Extract_Data_String = function(_data_buffer, _encrypt, _compress)
-    {
+	static __Cyg_Extract_Data_String = function(_data_buffer, _encrypt, _compress)
+	{
 		var _working_buffer = buffer_create(buffer_get_size(_data_buffer), buffer_fixed, 1);
 		buffer_copy(_data_buffer, 0, buffer_get_size(_data_buffer), _working_buffer, 0);
 
@@ -433,7 +421,7 @@ function Cyg()
 				buffer_delete(_decompressed_buffer);
 			}
 		}
-        
+		
 		if (_encrypt)
 		{
 			var _effective_key = __Cyg_Get_Effective_Key();
@@ -446,27 +434,28 @@ function Cyg()
 			buffer_delete(_working_buffer);
 			var _working_buffer = _decrypted_buffer;
 		}
-        
+		
 		buffer_seek(_working_buffer, buffer_seek_start, 0);
 		var _final_string = buffer_read(_working_buffer, buffer_string);
 		buffer_delete(_working_buffer);
-        
+		
 		return _final_string;
-    }
+	}
 
 	/// @ignore Ensures manager object exists in the game.
-    static __Cyg_Init_Manager = function()
-    {
-        if (!instance_exists(o_cyg_manager) )
-        {
+	static __Cyg_Init_Manager = function()
+	{
+		if (!instance_exists(o_cyg_manager) )
+		{
 			__cyg_alert("Creating o_cyg_manager instance.");
-            instance_create_depth(0, 0, __CYG_MANAGER_DEPTH, o_cyg_manager);
-        }
-        else
-        {
-            instance_activate_object(o_cyg_manager);
-        }
-    }
+			instance_create_depth(0, 0, __CYG_MANAGER_DEPTH, o_cyg_manager);
+		}
+		else
+		{
+			__cyg_alert("Activating existing o_cyg_manager instance.");
+			instance_activate_object(o_cyg_manager);
+		}
+	}
 
 	/// @ignore Builds the final buffer ready to be saved.
 	static __Cyg_Build_Export_Buffer = function(_key, _encrypt, _compress)
@@ -484,12 +473,12 @@ function Cyg()
 			__data.__file_version = __version;
 			_string = json_stringify(__data);
 		}
-        
-        if (_encrypt && !__Cyg_Has_Encryption_Key())
-        {
+		
+		if (_encrypt && !__Cyg_Has_Encryption_Key())
+		{
 			__cyg_alert("Encryption requested without a valid key. Use CYG_MASTER_KEY or SetEncryptKey().");
-            _encrypt = false;
-        }
+			_encrypt = false;
+		}
 
 		var _data_buffer =	__Cyg_Prepare_Data_Buffer(_string, _encrypt, _compress);
 		if (is_undefined(_data_buffer))
@@ -498,48 +487,48 @@ function Cyg()
 		}
 		var _hash =			cyg_sha256_buffer(_data_buffer, 0, buffer_get_size(_data_buffer));
 		var _final_buffer =	buffer_create(1, buffer_grow, 1);
-        
+		
 		buffer_write(_final_buffer, buffer_string, _hash);
 		buffer_copy(_data_buffer, 0, buffer_get_size(_data_buffer), _final_buffer, buffer_tell(_final_buffer));
 		buffer_delete(_data_buffer);
-        
+		
 		return _final_buffer;
 	}
-    
+	
 	/// @ignore Processes a loaded buffer and returns final data.
-    static __Cyg_Process_Import_Buffer = function(_loaded_buffer, _path, _encrypt, _compress)
-    {
+	static __Cyg_Process_Import_Buffer = function(_loaded_buffer, _path, _encrypt, _compress)
+	{
 		static DFix = function(_struct) { return _struct; }
 		
-        var _saved_hash = buffer_read(_loaded_buffer, buffer_string);
+		var _saved_hash = buffer_read(_loaded_buffer, buffer_string);
 		var _data_offset = buffer_tell(_loaded_buffer);
 		var _data_size = buffer_get_size(_loaded_buffer) - _data_offset;
-        
-        if (_data_size <= 0) 
+		
+		if (_data_size <= 0) 
 		{
 			__cyg_error($"File '{_path}' is empty or corrupted.");
 			return { success: false, data: undefined };
-        }
-        
+		}
+		
 		var _calculated_hash = cyg_sha256_buffer(_loaded_buffer, _data_offset, _data_size);
 		if (_saved_hash != _calculated_hash) 
 		{
 			__cyg_error($"Checksum failed! File '{_path}' is corrupted or has been modified.");
 			return { success: false, data: undefined };
 		}
-        
+		
 		var _data_buffer = buffer_create(_data_size, buffer_fixed, 1);
 		buffer_copy(_loaded_buffer, _data_offset, _data_size, _data_buffer, 0);
 		
 		if (_encrypt && !__Cyg_Has_Encryption_Key()) 
-        {
+		{
 			__cyg_alert("Decryption requested without a valid key. Use CYG_MASTER_KEY or SetEncryptKey().");
-            buffer_delete(_data_buffer);
-            return { success: false, data: undefined };
-        }
-        
+			buffer_delete(_data_buffer);
+			return { success: false, data: undefined };
+		}
+		
 		var _string = __Cyg_Extract_Data_String(_data_buffer, _encrypt, _compress);
-        buffer_delete(_data_buffer);
+		buffer_delete(_data_buffer);
 		if (_string == "")
 		{
 			return { success: false, data: undefined };
@@ -553,13 +542,13 @@ function Cyg()
 			return { success: false, data: undefined };
 		}
 		
-        var _file_version =	_parsed_data[$ "__file_version"] ?? _parsed_data[$ "__FileVersion"] ?? -1;
-        var _fixer_func = __fixers[$ string(_file_version)] ?? DFix;
-        var _data_to_fix = struct_exists(_parsed_data, "__data") ? _parsed_data.__data : _parsed_data;
-        var _final_data = _fixer_func(_data_to_fix);
-        
+		var _file_version =	_parsed_data[$ "__file_version"] ?? _parsed_data[$ "__FileVersion"] ?? -1;
+		var _fixer_func = __fixers[$ string(_file_version)] ?? DFix;
+		var _data_to_fix = struct_exists(_parsed_data, "__data") ? _parsed_data.__data : _parsed_data;
+		var _final_data = _fixer_func(_data_to_fix);
+		
 		return { success: true, data: _final_data };
-    }
+	}
 	
 	#endregion
 
@@ -628,8 +617,9 @@ function Cyg()
 
 		if (!__Cyg_Validate_IO_Path(_path, "Export"))
 		{
+			__cyg_alert($"Invalid file path: '{_path}'.");
 			if (is_callable(_callback)) _callback(false);
-			return;
+			exit;
 		}
 		
 		if (__CYG_USE_BACKUPS && file_exists(_path) ) 
@@ -637,23 +627,50 @@ function Cyg()
 			var _timestamp = __Cyg_Get_Timestamp();
 			var _backup_path = $"{_path}_{_timestamp}.bak";
 			file_rename(_path, _backup_path);
+
 			__cyg_alert($"Backup created: {_backup_path}");
 		}
 
 		var _final_buffer =	__Cyg_Build_Export_Buffer(_key, _encrypt, __CYG_USE_COMPRESS);
 		if (is_undefined(_final_buffer))
 		{
+			__cyg_alert("Failed to build export buffer. Export aborted.");
 			if (is_callable(_callback)) _callback(false);
-			return;
+			exit;
 		}
+
 		var _size =	buffer_get_size(_final_buffer);
 		var _async_id =	buffer_save_async(_final_buffer, _path, 0, _size);
 		if (_async_id < 0)
 		{
 			__cyg_error($"Could not start async save for '{_path}'. This can happen on sandboxed targets when the path is not writable.");
-			if (buffer_exists(_final_buffer)) buffer_delete(_final_buffer);
-			if (is_callable(_callback)) _callback(false);
-			return;
+			// Wait a few frames before deleting the buffer to avoid conflicts with the failed async operation.
+			with ({_final_buffer, _callback}) call_later(1, time_source_units_frames, function() {
+				try
+				{
+					if (buffer_exists(_final_buffer)) buffer_delete(_final_buffer);
+				}
+				catch (_exception)
+				{
+					__cyg_error($"Exception cleaning failed export buffer: {string(_exception)}");
+				}
+				finally
+				{
+					if (is_callable(_callback))
+					{
+						try
+						{
+							_callback(false);
+						}
+						catch (_callback_exception)
+						{
+							__cyg_error($"Exception in export callback fallback: {string(_callback_exception)}");
+						}
+					}
+				}
+			});
+			
+			exit;
 		}
 		
 		__cyg_alert($"Export async_id={_async_id}, buffer_size={_size}");
@@ -670,47 +687,71 @@ function Cyg()
 	/// @param {String} [key] Key where imported data will be stored.
 	/// @param {Bool}   [encrypt] Enables decryption.
 	/// @param {Method} callback Callback on completion. Receives (success:Bool, data:Any).
-    static Import = function(_path, _key=undefined, _encrypt=false, _callback=undefined)
-    {
-        __cyg_alert($"Import iniciado, path={_path} file_exists={file_exists(_path)}, key={_key}");
+	static Import = function(_path, _key=undefined, _encrypt=false, _callback=undefined)
+	{
+		__cyg_alert($"Import started, path={_path} file_exists={file_exists(_path)}, key={_key}");
 		__Cyg_Init_Manager();
 
 		if (!__Cyg_Validate_IO_Path(_path, "Import"))
 		{
+			__cyg_alert($"File '{_path}' does not exist.");
 			if (is_callable(_callback)) _callback(false, undefined);
-			return;
+			exit;
 		}
-        
+		
 		if (!file_exists(_path) ) 
 		{
+			__cyg_alert($"File '{_path}' does not exist.");
 			if (is_callable(_callback) ) _callback(false, undefined);
-            exit;
-        }
+			exit;
+		}
 		
 		// Create a target buffer where async load writes data.
-        var _target_buffer = buffer_create(1, buffer_grow, 1);
-        var _async_id = buffer_load_async(_target_buffer, _path, 0, -1);
-        if (_async_id < 0)
-        {
+		var _target_buffer = buffer_create(1, buffer_grow, 1);
+		var _async_id = buffer_load_async(_target_buffer, _path, 0, -1);
+		if (_async_id < 0)
+		{
 			__cyg_error($"Could not start async load for '{_path}'.");
-            buffer_delete(_target_buffer);
 
-			if (is_callable(_callback) ) _callback(false, undefined);
-            
+			// Destroy target buffer after a delay to avoid conflicts with the failed async operation.
+			with ({_target_buffer, _callback}) call_later(1, time_source_units_frames, function() {
+				try
+				{
+					if (buffer_exists(_target_buffer)) buffer_delete(_target_buffer);
+				}
+				catch (_exception)
+				{
+					__cyg_error($"Exception cleaning failed import buffer: {string(_exception)}");
+				}
+				finally
+				{
+					if (is_callable(_callback))
+					{
+						try
+						{
+							_callback(false, undefined);
+						}
+						catch (_callback_exception)
+						{
+							__cyg_error($"Exception in import callback fallback: {string(_callback_exception)}");
+						}
+					}
+				}
+			});
+			
 			exit;
-        }
-        __cyg_alert($"Import async_id={_async_id} created buffer");
-        
-        async_requests[? _async_id] = {
-            type:		"import",
-            callback:	_callback,
-            key:		_key,
-            encrypt:	_encrypt,
-            path:		_path,
-			// Keep a reference to target buffer.
-            buffer:     _target_buffer
-        };
-    }
+		}
+
+		__cyg_alert($"Import async_id={_async_id} created buffer");
+		async_requests[? _async_id] = {
+			type:		"import",		
+			callback:	_callback,		
+			key:		_key,			
+			encrypt:	_encrypt,		
+			path:		_path,			
+			buffer:     _target_buffer	// Keep a reference to target buffer.
+		};
+	}
 
 	/// @desc Processes async events. Must be called from Async - Save/Load event.
 	/// @param {DS_Map} async_load ds_map provided by GameMaker.
@@ -780,11 +821,11 @@ function Cyg()
 						_final_data = _result.data;
 						if (_request.key == undefined)
 						{
-								__data = _final_data;
+							__data = _final_data;
 						}
 						else
 						{
-								Add(_request.key, _final_data);
+							Add(_request.key, _final_data);
 						}
 					}
 
@@ -926,13 +967,7 @@ function Cyg()
 			}
 		}
 		
-		if (file_exists(_path) ) 
-		{
-			file_delete(_path); 
-			
-			return true;
-		}
-
+		if (file_exists(_path) ) { file_delete(_path);  return true; }
 		return false;
 	}
 
@@ -952,19 +987,44 @@ function Cyg()
 /// @ignore
 function __cyg_alert(_msg)
 {
+	static _origin = "unknown:0";
 	if (__CYG_DEBUG_WARNINGS)
 	{
-		show_debug_message($"Cyg Warning:: {_msg}");
+		var _stack = debug_get_callstack(2);
+		if (is_array(_stack))
+		{
+			if (array_length(_stack) > 1) _origin = _stack[1];
+			else if (array_length(_stack) > 0) _origin = _stack[0];
+		}
+		// Remove common GML prefixes to improve readability of debug messages.
+		if (string_starts_with(_origin, "gml_GlobalScript_") ) { _origin = string_delete(_origin, 1, 17); }
+		if (string_starts_with(_origin, "gml_Object_") ) { _origin = string_delete(_origin, 1, 11); }
+
+		show_debug_message($"Cyg Alert:: {_origin}: {_msg}");
 	}
 }
 
 /// @ignore
 function __cyg_error(_msg)
 {
-	if (__CYG_DEBUG_ERRORS) { show_debug_message($"Cyg Error:: {_msg}"); }
-	if (__CYG_STRICT_MODE)
+	static _origin = "unknown:0";
+	if (__CYG_DEBUG_ERRORS)
 	{
-		show_error($"Cyg Fatal Error:: {_msg}", true);
+		var _stack = debug_get_callstack(2);
+		if (is_array(_stack) )
+		{
+			if (array_length(_stack) > 1) _origin = _stack[1];
+			else if (array_length(_stack) > 0) _origin = _stack[0];
+		}
+
+		// Remove common GML prefixes to improve readability of debug messages.
+		if (string_starts_with(_origin, "gml_GlobalScript_") ) { _origin = string_delete(_origin, 1, 17); }
+		if (string_starts_with(_origin, "gml_Object_") ) { _origin = string_delete(_origin, 1, 11); }
+		
+		show_debug_message($"Cyg Error:: {_origin}: {_msg}");
+
+		// If strict mode is enabled crash the game with an error message to avoid silent failures.
+		if (__CYG_STRICT_MODE) { show_error($"Cyg Fatal Error:: {_origin}: {_msg}", true); }
 	}
 }
 
@@ -1188,10 +1248,10 @@ function __chacha20_block(_key_bytes, _nonce_bytes, _counter)
 	_state[3]  = 0x6b206574;
 	var i = 0;
 	repeat(8)
-    {
+	{
 		_state[4 + i] = __chacha20_from_bytes(_key_bytes, i * 4);
 		i++;
-    }
+	}
 
 	_state[12] = _counter & 0xFFFFFFFF;
 	_state[13] = __chacha20_from_bytes(_nonce_bytes, 0);
@@ -1201,10 +1261,10 @@ function __chacha20_block(_key_bytes, _nonce_bytes, _counter)
 	var _working = array_create(16, 0);
 	i = 0;
 	repeat(16)
-    {
+	{
 		_working[i] = _state[i];
-        i++;
-    }
+		i++;
+	}
 
 	repeat(10)
 	{
