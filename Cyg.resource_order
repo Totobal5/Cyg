@@ -1,22 +1,12 @@
 {
   "FolderOrderSettings":[
-    {"name":"Crispy","order":4,"path":"folders/Crispy.yy",},
-    {"name":"Cyg","order":5,"path":"folders/Cyg.yy",},
-    {"name":"Rooms","order":1,"path":"folders/Rooms.yy",},
+    {"name":"Demo","order":2,"path":"folders/Demo.yy",},
   ],
   "ResourceOrderSettings":[
-    {"name":"Cyg_Licence","order":2,"path":"notes/Cyg_Licence/Cyg_Licence.yy",},
-    {"name":"o_crispy_async","order":9,"path":"objects/o_crispy_async/o_crispy_async.yy",},
-    {"name":"o_cyg_manager","order":1,"path":"objects/o_cyg_manager/o_cyg_manager.yy",},
-    {"name":"o_cyg_test_suite","order":3,"path":"objects/o_cyg_test_suite/o_cyg_test_suite.yy",},
-    {"name":"Crispy_Case_Async","order":1,"path":"scripts/Crispy_Case_Async/Crispy_Case_Async.yy",},
-    {"name":"crispy_Config","order":2,"path":"scripts/crispy_Config/crispy_Config.yy",},
-    {"name":"crispy_Functions","order":3,"path":"scripts/crispy_Functions/crispy_Functions.yy",},
-    {"name":"crispy_Log","order":4,"path":"scripts/crispy_Log/crispy_Log.yy",},
-    {"name":"crispy_Runner","order":5,"path":"scripts/crispy_Runner/crispy_Runner.yy",},
-    {"name":"crispy_Self_Test","order":6,"path":"scripts/crispy_Self_Test/crispy_Self_Test.yy",},
-    {"name":"crispy_Suite","order":7,"path":"scripts/crispy_Suite/crispy_Suite.yy",},
-    {"name":"crispy_Test","order":8,"path":"scripts/crispy_Test/crispy_Test.yy",},
-    {"name":"Cyg_Tests","order":3,"path":"scripts/Cyg_Tests/Cyg_Tests.yy",},
+    {"name":"Cyg_Licence","order":4,"path":"notes/Cyg_Licence/Cyg_Licence.yy",},
+    {"name":"o_cyg_manager","order":6,"path":"objects/o_cyg_manager/o_cyg_manager.yy",},
+    {"name":"o_cyg_test_suite","order":1,"path":"objects/o_cyg_test_suite/o_cyg_test_suite.yy",},
+    {"name":"Cyg_Tests","order":5,"path":"scripts/Cyg_Tests/Cyg_Tests.yy",},
+    {"name":"Cyg","order":3,"path":"scripts/Cyg/Cyg.yy",},
   ],
 }

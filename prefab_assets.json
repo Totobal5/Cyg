@@ -1,0 +1,17 @@
+{
+  "Version": "1.0",
+  "assets": [
+    {
+      "export": 2,
+      "name": "Cyg"
+    },
+    {
+      "export": 2,
+      "name": "Cyg_Licence"
+    },
+    {
+      "export": 1,
+      "name": "o_cyg_manager"
+    }
+  ]
+}

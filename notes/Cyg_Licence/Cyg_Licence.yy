@@ -1,10 +1,10 @@
 {
-  "$GMNotes":"v1",
+  "$GMNotes":"v2",
   "%Name":"Cyg_Licence",
   "name":"Cyg_Licence",
   "parent":{
     "name":"Cyg",
-    "path":"folders/Cyg.yy",
+    "path":"Cyg.yyp",
   },
   "resourceType":"GMNotes",
   "resourceVersion":"2.0",

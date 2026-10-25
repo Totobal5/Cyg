@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "gamemaker-resource-tool": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx @gamemaker/gm-cli@latest resourcetool mcp"
+      ],
+      "env": {}
+    }
+  }
+}

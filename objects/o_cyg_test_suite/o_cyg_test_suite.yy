@@ -9,8 +9,8 @@
   "name":"o_cyg_test_suite",
   "overriddenProperties":[],
   "parent":{
-    "name":"Cyg",
-    "path":"Cyg.yyp",
+    "name":"Demo",
+    "path":"folders/Demo.yy",
   },
   "parentObjectId":null,
   "persistent":false,

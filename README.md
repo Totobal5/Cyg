@@ -19,9 +19,9 @@ Note: Cyg has not yet been used by me in a production game.
 
 ```gml
 // 1) Store values
-Cyg.Add("player_name", "Toto");
-Cyg.Add("level", 5);
-Cyg.Add("inventory", ["sword", "potion"]);
+Cyg.Set("player_name", "Toto");
+Cyg.Set("level", 5);
+Cyg.Set("inventory", ["sword", "potion"]);
 
 // 2) Save to disk
 Cyg.Export("save_file");
@@ -33,6 +33,18 @@ Cyg.Import("save_file");
 var name = Cyg.Get("player_name");
 var level = Cyg.Get("level");
 ```
+
+## Paths And The File System Sandbox
+
+Pass a file name (`"save_file"`) and Cyg resolves it for you. GameMaker stores files written by
+`buffer_save_async()` inside a `default/` folder of `game_save_id`, and — as the manual states —
+no other file function adds that folder on its own. Cyg therefore hands the async calls the name
+as given and the synchronous helpers behind backups, pruning and `Cyg.Delete()` the same file with
+`default/` spelled out, so every operation addresses one file with the file system sandbox enabled
+or disabled.
+
+An absolute path is passed through untouched: GameMaker skips the `default/` folder for it when the
+sandbox is disabled, and Cyg accounts for that too.
 
 ## Simple Encryption Setup
 
@@ -64,7 +76,7 @@ That is it. Cyg handles the rest.
 
 1. Download the `scripts/` folder.
 2. Import the `.yymps` package into your GameMaker project.
-3. Start using `Cyg.Add()`, `Cyg.Export()`, `Cyg.Import()`, and `Cyg.Get()`.
+3. Start using `Cyg.Set()`, `Cyg.Export()`, `Cyg.Import()`, and `Cyg.Get()`.
 
 ## License
 

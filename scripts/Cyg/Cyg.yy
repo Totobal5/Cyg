@@ -6,7 +6,7 @@
   "name":"Cyg",
   "parent":{
     "name":"Cyg",
-    "path":"folders/Cyg.yy",
+    "path":"Cyg.yyp",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",
