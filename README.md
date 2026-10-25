@@ -48,18 +48,17 @@ sandbox is disabled, and Cyg accounts for that too.
 
 ## Simple Encryption Setup
 
-Define one master key as an ASCII byte array:
+Set the key once at start-up — `Export()` and `Import()` use it whenever you pass `true`:
 
 ```gml
-#macro CYG_MASTER_KEY [43, 20, 10, 43, 48, ...]
-```
+Cyg.SetEncryptKey("0123456789abcdef0123456789abcdef");   // 32 bytes
 
-Then enable encryption with the same flow you already use:
-
-```gml
 Cyg.Export("save_file", undefined, true);
 Cyg.Import("save_file", undefined, true);
 ```
+
+`CYG_MASTER_KEY` inside the prefab is only its built-in default: a macro defined in your own
+project does not reach the prefab, so use `Cyg.SetEncryptKey()` (or customise the prefab) instead.
 
 That is it. Cyg handles the rest.
 

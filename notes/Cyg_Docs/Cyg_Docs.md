@@ -62,12 +62,14 @@ Cyg.Export("save_file", undefined, true);
 Cyg.Import("save_file", undefined, true);
 ```
 
-The key is either the `CYG_MASTER_KEY` macro (32 ASCII bytes in an array) or whatever you pass to `Cyg.SetEncryptKey()`, which accepts a 32-byte string, array, or buffer:
+Use `Cyg.SetEncryptKey()` with a 32-byte string, array, or buffer:
 
 ```gml
 Cyg.SetEncryptKey("0123456789abcdef0123456789abcdef");
 Cyg.SetEncryptKey(undefined);   // back to CYG_MASTER_KEY
 ```
+
+`CYG_MASTER_KEY` inside the prefab is only its built-in default: a macro defined in the consuming project never reaches the prefab, so set the key with `SetEncryptKey()` or customise the prefab.
 
 Two behaviours are worth knowing:
 
@@ -182,16 +184,18 @@ Deletes the save and all of its backups. Returns `true` when the save file exist
 
 | Macro | Default | Effect |
 | --- | --- | --- |
+| `CYG_VERSION` | `"1.1.0"` | Library version, written into saves and used in the log prefixes. |
 | `CYG_MASTER_KEY` | 32 ASCII bytes | Default encryption key. |
 | `CYG_BACKUPS_ENABLED` | `true` | Create a backup before overwriting a save. |
 | `CYG_BACKUP_FILENAME_FORMAT` | `"{0}_{1}.bak"` | Backup name pattern. |
 | `CYG_BACKUP_MAX_COUNT` | `1` | Backups kept per save, oldest pruned first. |
 | `CYG_COMPRESS_ENABLED` | `false` | Compress the payload before writing. |
+| `CYG_MANAGER_DEPTH` | `-10000` | Depth of the `o_cyg_manager` instance Cyg spawns. |
 | `CYG_LOG_ALERTS` | `true` | Print diagnostics with `show_debug_message()`. |
 | `CYG_LOG_ERRORS` | `true` | Print errors with `show_debug_message()`. |
-| `CYG_FATAL_ERRORS` | `false` | Turn logged errors into a `show_error()` abort. |
+| `CYG_FATAL_ERRORS` | `false` | Show logged errors with `show_error()` as well. |
 
-Macros are compile-time, so they cannot be changed while the game runs; use `SetVersion()` and `SetEncryptKey()` for the settings that have to vary.
+They are compile-time constants of the prefab, so neither redefining one in your project nor a runtime change can alter them; use `SetVersion()` and `SetEncryptKey()` for the settings that have to vary.
 
 ## Scope and limitations
 

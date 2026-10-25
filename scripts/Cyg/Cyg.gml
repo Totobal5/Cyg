@@ -1,5 +1,8 @@
+#export CYG_VERSION, CYG_LOG_ALERTS, CYG_LOG_ERRORS, CYG_FATAL_ERRORS, CYG_BACKUPS_ENABLED, CYG_BACKUP_FILENAME_FORMAT, CYG_BACKUP_MAX_COUNT, CYG_COMPRESS_ENABLED, CYG_MANAGER_DEPTH, CYG_MASTER_KEY
+#export Cyg
+
 /// @ignore [MAJOR-MINOR-PATCH]
-#macro CYG_VERSION			"1_1_0"
+#macro CYG_VERSION			"1.1.0"
 
 /// @ignore Show warning messages in the console.
 #macro CYG_LOG_ALERTS		true
@@ -943,16 +946,27 @@ function Cyg()
 }
 
 /// @ignore
+/// @desc Removes the prefab prefix from a trace origin.
+///       "cyou_tobalsea_cyg_1_1_0_Cyg:979" becomes "Cyg:979".
+///       The prefix is built from CYG_VERSION, so the macro and the package version stay in step.
+/// @param {String} origin Trace origin as reported by ytrace.
+/// @return {String} The origin without the package and version prefix.
+function __cyg_strip_origin(_origin)
+{
+	var _prefix = $"cyou_tobalsea_cyg_{string_replace_all(CYG_VERSION, ".", "_")}_";
+	if (!string_starts_with(_origin, _prefix) ) return _origin;
+
+	return string_delete(_origin, 1, string_length(_prefix) );
+}
+
+/// @ignore
 /// @desc Logs an alert message to the console if CYG_LOG_ALERTS is enabled.
 /// @param {String} msg Message to log.
 function __cyg_alert(_msg)
 {
 	if (CYG_LOG_ALERTS)
 	{
-		var _origin = ytrace_origin;
-		_origin = string_replace_all(_origin, $"cyou_tobalsea_cyg_{CYG_VERSION}___", "tobalsea_cyg_");
-
-		show_debug_message($"Cyg Alert:: {_origin}: {_msg}");
+		show_debug_message($"Cyg Alert:: {__cyg_strip_origin(ytrace_origin)}: {_msg}");
 	}
 }
 
@@ -963,8 +977,7 @@ function __cyg_error(_msg)
 {
 	if (CYG_LOG_ERRORS || CYG_FATAL_ERRORS)
 	{
-		var _origin = ytrace_origin;
-		_origin = string_replace_all(_origin, $"cyou_tobalsea_cyg_{CYG_VERSION}___", "tobalsea_cyg_");
+		var _origin = __cyg_strip_origin(ytrace_origin);
 		show_debug_message($"Cyg Error:: {_origin}: {_msg}");
 		
 		// If strict mode is enabled crash the game with an error message to avoid silent failures.
