@@ -28,6 +28,7 @@
   },
   "name":"Cyg",
   "resources":[
+    {"id":{"name":"Cyg_Docs","path":"notes/Cyg_Docs/Cyg_Docs.yy",},},
     {"id":{"name":"Cyg_Licence","path":"notes/Cyg_Licence/Cyg_Licence.yy",},},
     {"id":{"name":"o_cyg_manager","path":"objects/o_cyg_manager/o_cyg_manager.yy",},},
     {"id":{"name":"o_cyg_test_suite","path":"objects/o_cyg_test_suite/o_cyg_test_suite.yy",},},

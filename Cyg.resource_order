@@ -3,6 +3,7 @@
     {"name":"Demo","order":2,"path":"folders/Demo.yy",},
   ],
   "ResourceOrderSettings":[
+    {"name":"Cyg_Docs","order":7,"path":"notes/Cyg_Docs/Cyg_Docs.yy",},
     {"name":"Cyg_Licence","order":4,"path":"notes/Cyg_Licence/Cyg_Licence.yy",},
     {"name":"o_cyg_manager","order":6,"path":"objects/o_cyg_manager/o_cyg_manager.yy",},
     {"name":"o_cyg_test_suite","order":1,"path":"objects/o_cyg_test_suite/o_cyg_test_suite.yy",},

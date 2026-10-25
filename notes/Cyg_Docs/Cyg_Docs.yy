@@ -1,0 +1,11 @@
+{
+  "$GMNotes":"v2",
+  "%Name":"Cyg_Docs",
+  "name":"Cyg_Docs",
+  "parent":{
+    "name":"Cyg",
+    "path":"Cyg.yyp",
+  },
+  "resourceType":"GMNotes",
+  "resourceVersion":"2.0",
+}

@@ -21,7 +21,7 @@
 #macro CYG_BACKUP_MAX_COUNT	1
 
 /// @ignore Whether to compress buffers before saving.
-#macro CYG_COMPRESS_ON		false
+#macro CYG_COMPRESS_ENABLED	false
 
 /// @ignore Depth used when creating the Cyg manager object.
 #macro CYG_MANAGER_DEPTH	-10000
@@ -609,7 +609,7 @@ function Cyg()
 						_request.path,
 						_request.key,
 						_request.encrypt,
-						CYG_COMPRESS_ON,
+						CYG_COMPRESS_ENABLED,
 						_request.encryption_key
 					);
 					__cyg_alert($"Import result.success={_result.success}");
@@ -728,7 +728,7 @@ function Cyg()
 				__PruneBackups(_sync_path);
 			}
 
-			var _final_buffer = __BuildExportBuffer(_key, _encrypt, CYG_COMPRESS_ON);
+			var _final_buffer = __BuildExportBuffer(_key, _encrypt, CYG_COMPRESS_ENABLED);
 			if (is_undefined(_final_buffer) )
 			{
 				__cyg_alert("Failed to build export buffer. Export aborted.");
