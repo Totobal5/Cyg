@@ -8,10 +8,12 @@
   "keywords": [
     "save system",
     "encryption",
-    "backups"
+    "backups",
+    "Prefab",
+    "cyou.tobalsea.cyg"
   ],
   "author": "Totobal",
-  "license": "C:\\Users\\xtoba\\Documents\\Github\\Game Maker\\gm-cyg\\notes\\Cyg_Licence\\Cyg_Licence.txt",
+  "license": "SEE LICENSE IN licence.txt",
   "gm": {
     "destination": "toto/cyg",
     "icon": {
